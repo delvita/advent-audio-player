@@ -6,7 +6,7 @@ export const getFeedItems = async (): Promise<Chapter[]> => {
     const response = await fetch(
       `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(
         'https://wirfamilien.ch/tag/advent/feed'
-      )}`
+      )}&api_key=nxwerxc6qq3vgbio0qnfkh0mwwmjq7ajgkvhzqbe`
     );
     
     const data = await response.json();
@@ -21,10 +21,17 @@ export const getFeedItems = async (): Promise<Chapter[]> => {
       const audioMatch = item.content?.match(/<audio[^>]*src="([^"]*)"[^>]*>/);
       const audioSrc = audioMatch ? audioMatch[1] : '';
       
+      // Get the first image from the content if no thumbnail exists
+      let image = item.thumbnail;
+      if (!image && item.content) {
+        const imgMatch = item.content.match(/<img[^>]*src="([^"]*)"[^>]*>/);
+        image = imgMatch ? imgMatch[1] : '';
+      }
+      
       return {
         title: item.title || '',
         audioSrc,
-        image: item.thumbnail || item.enclosure?.link
+        image: image || item.enclosure?.link || ''
       };
     }).filter(item => item.audioSrc);
   } catch (error) {
