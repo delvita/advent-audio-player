@@ -2,36 +2,41 @@ import { Chapter } from '@/components/ChapterList';
 
 export const getFeedItems = async (): Promise<Chapter[]> => {
   try {
-    // Use RSS2JSON service to convert RSS to JSON
-    const response = await fetch(
-      `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(
-        'https://wirfamilien.ch/tag/advent/feed'
-      )}&api_key=nxwerxc6qq3vgbio0qnfkh0mwwmjq7ajgkvhzqbe`
-    );
-    
-    const data = await response.json();
-    
-    if (!data.items) {
-      console.error('No items found in feed');
-      return [];
-    }
+    const response = await fetch('https://wirfamilien.ch/tag/advent/feed');
+    const text = await response.text();
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(text, 'text/xml');
+    const items = xmlDoc.querySelectorAll('item');
 
-    return data.items.map(item => {
-      // Extract audio source from content
-      const audioMatch = item.content?.match(/<audio[^>]*src="([^"]*)"[^>]*>/);
-      const audioSrc = audioMatch ? audioMatch[1] : '';
+    return Array.from(items).map(item => {
+      // Get title
+      const title = item.querySelector('title')?.textContent || '';
       
-      // Get the first image from the content if no thumbnail exists
-      let image = item.thumbnail;
-      if (!image && item.content) {
-        const imgMatch = item.content.match(/<img[^>]*src="([^"]*)"[^>]*>/);
-        image = imgMatch ? imgMatch[1] : '';
+      // Get enclosure (audio) URL
+      const enclosure = item.querySelector('enclosure');
+      const audioSrc = enclosure?.getAttribute('url') || '';
+      
+      // Get image from content or media:content
+      let image = '';
+      const content = item.querySelector('content\\:encoded')?.textContent || 
+                     item.querySelector('description')?.textContent || '';
+      
+      // Try to find image in content
+      const imgMatch = content.match(/<img[^>]*src="([^"]*)"[^>]*>/);
+      if (imgMatch) {
+        image = imgMatch[1];
       }
       
+      // If no image in content, try media:content
+      if (!image) {
+        const mediaContent = item.querySelector('media\\:content, media\\:thumbnail');
+        image = mediaContent?.getAttribute('url') || '';
+      }
+
       return {
-        title: item.title || '',
+        title,
         audioSrc,
-        image: image || item.enclosure?.link || ''
+        image
       };
     }).filter(item => item.audioSrc);
   } catch (error) {
