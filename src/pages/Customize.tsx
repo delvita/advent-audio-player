@@ -3,7 +3,7 @@ import { PlayerPreview } from '@/components/PlayerPreview';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getFeedItems } from '@/services/feedService';
 import { useState } from 'react';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { PlayerSettings as PlayerSettingsType } from '@/types/playerSettings';
 import { generateEmbedId, saveSettings, getAllSettings, getSettingsById, deleteSettings } from '@/services/settingsService';
 import { TemplatesList } from "@/components/TemplatesList";
@@ -28,12 +28,12 @@ const Customize = () => {
     playerType: 'medium'
   });
 
-  const { data: savedSettings = [] } = useQuery({
+  const { data: savedSettings = [], isError: isSettingsError } = useQuery({
     queryKey: ['settings'],
     queryFn: getAllSettings
   });
 
-  const { data: chapters = [] } = useQuery({
+  const { data: chapters = [], isError: isFeedError } = useQuery({
     queryKey: ['feed-items', settings.feedUrl],
     queryFn: () => getFeedItems({ queryKey: ['feed-items', settings.feedUrl] })
   });
@@ -47,12 +47,13 @@ const Customize = () => {
         description: "Einstellungen wurden erfolgreich gespeichert"
       });
     },
-    onError: () => {
+    onError: (error) => {
       toast({
-        title: "Error",
+        title: "Fehler",
         description: "Fehler beim Speichern der Einstellungen",
         variant: "destructive"
       });
+      console.error('Save settings error:', error);
     }
   });
 
@@ -65,19 +66,20 @@ const Customize = () => {
         description: "Einstellungen wurden erfolgreich gelöscht"
       });
     },
-    onError: () => {
+    onError: (error) => {
       toast({
-        title: "Error",
+        title: "Fehler",
         description: "Fehler beim Löschen der Einstellungen",
         variant: "destructive"
       });
+      console.error('Delete settings error:', error);
     }
   });
 
   const handleSaveSettings = () => {
-    if (!settings.name) {
+    if (!settings.name.trim()) {
       toast({
-        title: "Error",
+        title: "Fehler",
         description: "Bitte geben Sie einen Namen für die Einstellungen ein",
         variant: "destructive"
       });
@@ -95,10 +97,11 @@ const Customize = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
+        title: "Fehler",
         description: "Fehler beim Laden der Einstellungen",
         variant: "destructive"
       });
+      console.error('Load settings error:', error);
     }
   };
 
@@ -113,9 +116,17 @@ const Customize = () => {
     }
   };
 
-  const sortedChapters = [...chapters];
+  const sortedChapters = [...(chapters || [])];
   if (settings.sortAscending) {
     sortedChapters.reverse();
+  }
+
+  if (isSettingsError || isFeedError) {
+    toast({
+      title: "Fehler",
+      description: "Fehler beim Laden der Daten",
+      variant: "destructive"
+    });
   }
 
   return (
@@ -153,6 +164,10 @@ const Customize = () => {
                 chapters={sortedChapters}
                 showFirstPost={settings.showFirstPost}
                 listHeight={settings.listHeight}
+                style={{
+                  background: settings.colors.background,
+                  color: settings.colors.text
+                }}
               />
             </div>
           </Card>
