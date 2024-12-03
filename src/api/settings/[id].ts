@@ -28,6 +28,20 @@ export async function GET(request: Request, { params }: { params: { id: string }
       );
     }
     
+    // Ensure we're returning valid JSON
+    try {
+      JSON.parse(settings);
+    } catch (e) {
+      console.error('Invalid JSON in localStorage:', e);
+      return new Response(
+        JSON.stringify({ error: 'Invalid settings data' }),
+        {
+          status: 500,
+          headers
+        }
+      );
+    }
+    
     return new Response(
       settings,
       { 
