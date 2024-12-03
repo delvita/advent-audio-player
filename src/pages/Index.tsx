@@ -8,7 +8,7 @@ const Index = () => {
   const [activeChapter, setActiveChapter] = useState<Chapter>();
 
   const { data: chapters = [], isLoading } = useQuery({
-    queryKey: ['feed-items'],
+    queryKey: ['feed-items', 'https://wirfamilien.ch/tag/advent/feed'],
     queryFn: getFeedItems
   });
 

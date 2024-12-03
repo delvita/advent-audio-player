@@ -1,7 +1,8 @@
 import { Chapter } from '@/components/ChapterList';
 
-export const getFeedItems = async (feedUrl: string): Promise<Chapter[]> => {
+export const getFeedItems = async (context?: { queryKey: string[] }): Promise<Chapter[]> => {
   try {
+    const feedUrl = context?.queryKey?.[1] || 'https://wirfamilien.ch/tag/advent/feed';
     const corsProxy = 'https://mf1.ch/crosproxy/?';
     const response = await fetch(corsProxy + feedUrl);
     const text = await response.text();
