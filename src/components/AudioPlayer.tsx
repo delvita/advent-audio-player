@@ -21,6 +21,9 @@ const AudioPlayer = ({ src, title, image }: AudioPlayerProps) => {
       audioRef.current.addEventListener('timeupdate', handleTimeUpdate);
       audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
       
+      // Auto-play when src changes
+      audioRef.current.play().then(() => setIsPlaying(true));
+      
       return () => {
         if (audioRef.current) {
           audioRef.current.removeEventListener('timeupdate', handleTimeUpdate);
@@ -28,7 +31,7 @@ const AudioPlayer = ({ src, title, image }: AudioPlayerProps) => {
         }
       };
     }
-  }, []);
+  }, [src]);
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
