@@ -6,12 +6,7 @@ type DbPlayerSettings = {
   id: string;
   name: string;
   feed_url: string;
-  colors: {
-    background: string;
-    text: string;
-    primary: string;
-    secondary: string;
-  };
+  colors: PlayerSettings['colors'];
   list_height: string;
   sort_ascending: boolean;
   show_first_post: boolean;
@@ -19,15 +14,17 @@ type DbPlayerSettings = {
 };
 
 // Convert database row to PlayerSettings
-const toPlayerSettings = (dbSettings: DbPlayerSettings): PlayerSettings => ({
+const toPlayerSettings = (dbSettings: any): PlayerSettings => ({
   id: dbSettings.id,
   name: dbSettings.name,
   feedUrl: dbSettings.feed_url,
-  colors: dbSettings.colors,
+  colors: typeof dbSettings.colors === 'string' 
+    ? JSON.parse(dbSettings.colors) 
+    : dbSettings.colors,
   listHeight: dbSettings.list_height,
   sortAscending: dbSettings.sort_ascending,
   showFirstPost: dbSettings.show_first_post,
-  playerType: dbSettings.player_type,
+  playerType: dbSettings.player_type as "big" | "medium" | "small",
 });
 
 // Convert PlayerSettings to database format
@@ -67,7 +64,7 @@ export const getAllSettings = async (): Promise<PlayerSettings[]> => {
     .select('*');
 
   if (error) throw error;
-  return (data as DbPlayerSettings[]).map(toPlayerSettings);
+  return data ? data.map(toPlayerSettings) : [];
 };
 
 export const getSettingsById = async (id: string): Promise<PlayerSettings | null> => {
@@ -78,5 +75,5 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
     .single();
 
   if (error) throw error;
-  return data ? toPlayerSettings(data as DbPlayerSettings) : null;
+  return data ? toPlayerSettings(data) : null;
 };
