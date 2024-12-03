@@ -8,6 +8,13 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be defined');
 }
 
+// Validate URL format
+try {
+  new URL(supabaseUrl);
+} catch (error) {
+  throw new Error('Invalid VITE_SUPABASE_URL format. Must be a valid URL.');
+}
+
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export const saveSettings = async (settings: PlayerSettings): Promise<void> => {
