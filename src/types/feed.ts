@@ -1,22 +1,17 @@
 export interface FeedItem {
   title: string;
-  enclosure?: {
-    url: string;
-  };
+  audioUrl?: string;
+  imageUrl?: string;
+  publishDate?: string;
   content?: string;
-  pubDate?: string;
-  'media:content'?: {
-    $: {
-      url: string;
-    };
-  };
-}
-
-export interface ParsedFeed {
-  items: FeedItem[];
 }
 
 export interface FeedError extends Error {
   type: 'NETWORK' | 'PARSE' | 'TIMEOUT' | 'UNKNOWN';
   originalError?: unknown;
+}
+
+export interface FeedResponse {
+  items: FeedItem[];
+  error?: FeedError;
 }

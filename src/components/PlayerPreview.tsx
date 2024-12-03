@@ -1,17 +1,21 @@
+import { useState, useEffect } from 'react';
 import AudioPlayer from '@/components/AudioPlayer';
 import ChapterList, { Chapter } from '@/components/ChapterList';
-import { useState, useEffect } from 'react';
+import type { PlayerCSSProperties } from '@/types/styles';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 interface PlayerPreviewProps {
   chapters?: Chapter[];
   showFirstPost: boolean;
   listHeight: string;
+  style?: PlayerCSSProperties;
 }
 
 export const PlayerPreview = ({ 
   chapters = [], 
   showFirstPost, 
-  listHeight 
+  listHeight,
+  style 
 }: PlayerPreviewProps) => {
   const [activeChapter, setActiveChapter] = useState<Chapter | null>(null);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
@@ -38,23 +42,25 @@ export const PlayerPreview = ({
   }
 
   return (
-    <div className="w-full h-full">
-      {activeChapter && (
-        <AudioPlayer
-          src={activeChapter.audioSrc}
-          title={activeChapter.title}
-          image={activeChapter.image}
-          autoPlay={shouldAutoPlay}
-        />
-      )}
-      <div className="mt-2.5">
-        <ChapterList
-          chapters={chapters}
-          onChapterSelect={handleChapterSelect}
-          activeChapter={activeChapter}
-          maxHeight={parseInt(listHeight)}
-        />
-      </div>
+    <div className="w-full h-full" style={style}>
+      <ErrorBoundary>
+        {activeChapter && (
+          <AudioPlayer
+            src={activeChapter.audioSrc}
+            title={activeChapter.title}
+            image={activeChapter.image}
+            autoPlay={shouldAutoPlay}
+          />
+        )}
+        <div className="mt-2.5">
+          <ChapterList
+            chapters={chapters}
+            onChapterSelect={handleChapterSelect}
+            activeChapter={activeChapter}
+            maxHeight={parseInt(listHeight)}
+          />
+        </div>
+      </ErrorBoundary>
     </div>
   );
 };
