@@ -29,12 +29,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
     
     try {
-      // Verify that settings is valid JSON
-      JSON.parse(settings);
+      // Verify that settings is valid JSON and matches PlayerSettings type
+      const parsedSettings: PlayerSettings = JSON.parse(settings);
       
       // Return the settings with proper headers
       return new Response(
-        settings,
+        JSON.stringify(parsedSettings),
         { 
           status: 200,
           headers
