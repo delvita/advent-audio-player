@@ -11,7 +11,7 @@ interface PlayerPreviewProps {
 }
 
 export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHeight }: PlayerPreviewProps) => {
-  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(initialChapter || undefined);
+  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(initialChapter);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHei
       const defaultChapter = showFirstPost ? chapters[chapters.length - 1] : chapters[0];
       setActiveChapter(defaultChapter);
     }
-  }, [chapters, showFirstPost]);
+  }, [chapters, showFirstPost, activeChapter]);
 
   const handleChapterSelect = (chapter: Chapter) => {
     setActiveChapter(chapter);
