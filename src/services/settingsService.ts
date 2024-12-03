@@ -1,23 +1,48 @@
 import { supabase } from "@/integrations/supabase/client";
 import { PlayerSettings } from "@/types/playerSettings";
+import { Database } from "@/integrations/supabase/types";
+
+type DbPlayerSettings = Database['public']['Tables']['player_settings']['Row'];
+
+const mapDbToPlayerSettings = (dbSettings: DbPlayerSettings): PlayerSettings => {
+  const colors = typeof dbSettings.colors === 'string' 
+    ? JSON.parse(dbSettings.colors) 
+    : dbSettings.colors;
+
+  return {
+    id: dbSettings.id,
+    name: dbSettings.name,
+    feedUrl: dbSettings.feed_url,
+    colors: colors as PlayerSettings['colors'],
+    listHeight: dbSettings.list_height,
+    sortAscending: dbSettings.sort_ascending,
+    showFirstPost: dbSettings.show_first_post,
+    playerType: dbSettings.player_type as PlayerSettings['playerType']
+  };
+};
+
+const mapPlayerSettingsToDb = (settings: PlayerSettings) => {
+  return {
+    id: settings.id,
+    name: settings.name,
+    feed_url: settings.feedUrl,
+    colors: settings.colors,
+    list_height: settings.listHeight,
+    sort_ascending: settings.sortAscending,
+    show_first_post: settings.showFirstPost,
+    player_type: settings.playerType
+  };
+};
 
 export const generateEmbedId = (): string => {
   return Math.random().toString(36).substring(2, 15);
 };
 
 export const saveSettings = async (settings: PlayerSettings): Promise<void> => {
+  const dbSettings = mapPlayerSettingsToDb(settings);
   const { error } = await supabase
     .from('player_settings')
-    .upsert({
-      id: settings.id,
-      name: settings.name,
-      feed_url: settings.feedUrl,
-      colors: settings.colors,
-      list_height: settings.listHeight,
-      sort_ascending: settings.sortAscending,
-      show_first_post: settings.showFirstPost,
-      player_type: settings.playerType
-    });
+    .upsert(dbSettings);
 
   if (error) throw error;
 };
@@ -30,19 +55,9 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
     .single();
 
   if (error) throw error;
-  
   if (!data) return null;
 
-  return {
-    id: data.id,
-    name: data.name,
-    feedUrl: data.feed_url,
-    colors: data.colors,
-    listHeight: data.list_height,
-    sortAscending: data.sort_ascending,
-    showFirstPost: data.show_first_post,
-    playerType: data.player_type
-  };
+  return mapDbToPlayerSettings(data);
 };
 
 export const getAllSettings = async (): Promise<PlayerSettings[]> => {
@@ -51,17 +66,9 @@ export const getAllSettings = async (): Promise<PlayerSettings[]> => {
     .select('*');
 
   if (error) throw error;
+  if (!data) return [];
 
-  return data.map(item => ({
-    id: item.id,
-    name: item.name,
-    feedUrl: item.feed_url,
-    colors: item.colors,
-    listHeight: item.list_height,
-    sortAscending: item.sort_ascending,
-    showFirstPost: item.show_first_post,
-    playerType: item.player_type
-  }));
+  return data.map(mapDbToPlayerSettings);
 };
 
 export const deleteSettings = async (id: string): Promise<void> => {
