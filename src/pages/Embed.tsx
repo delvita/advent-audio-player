@@ -6,10 +6,11 @@ import { useQuery } from '@tanstack/react-query';
 import { getFeedItems } from '@/services/feedService';
 import { getSettingsById } from '@/services/settingsService';
 import type { PlayerSettings } from '@/types/playerSettings';
+import type { Chapter } from '@/components/ChapterList';
 
 const Embed = () => {
   const { embedId } = useParams();
-  const [activeChapter, setActiveChapter] = useState<any>();
+  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(undefined);
   const [settings, setSettings] = useState<PlayerSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
