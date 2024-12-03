@@ -48,11 +48,17 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
     
     // If not in localStorage, try the API endpoint
     console.log('Fetching settings from API for ID:', id);
-    const apiUrl = `${window.location.origin}/api/settings/${id}`;
+    const apiUrl = `/api/settings/${id}`;
     console.log('API URL:', apiUrl);
     
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
     console.log('API Response status:', response.status);
+    console.log('API Response headers:', response.headers);
     
     if (!response.ok) {
       console.error('API response not OK:', response.status);
@@ -74,6 +80,7 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
       return settings;
     } catch (error) {
       console.error('Failed to parse API response:', error);
+      console.log('Raw response was:', rawText);
       return null;
     }
   } catch (error) {

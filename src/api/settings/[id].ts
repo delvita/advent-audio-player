@@ -3,7 +3,7 @@ import { PlayerSettings } from '@/types/playerSettings';
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     const id = params.id;
-    console.log('Attempting to get settings for ID:', id);
+    console.log('API: Attempting to get settings for ID:', id);
     
     // Define headers with correct content type and CORS
     const headers = new Headers({
@@ -15,10 +15,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     // Get settings from localStorage
     const settings = localStorage.getItem(`settings_${id}`);
-    console.log('Retrieved settings from localStorage:', settings);
+    console.log('API: Retrieved settings from localStorage:', settings);
     
     if (!settings) {
-      console.log('No settings found for ID:', id);
+      console.log('API: No settings found for ID:', id);
       return new Response(
         JSON.stringify({ error: 'Settings not found' }), 
         { 
@@ -28,16 +28,30 @@ export async function GET(request: Request, { params }: { params: { id: string }
       );
     }
     
-    // Return the settings with proper headers
-    return new Response(
-      settings,
-      { 
-        status: 200,
-        headers
-      }
-    );
+    try {
+      // Verify that settings is valid JSON
+      JSON.parse(settings);
+      
+      // Return the settings with proper headers
+      return new Response(
+        settings,
+        { 
+          status: 200,
+          headers
+        }
+      );
+    } catch (error) {
+      console.error('API: Invalid JSON in settings:', error);
+      return new Response(
+        JSON.stringify({ error: 'Invalid settings data' }), 
+        { 
+          status: 500,
+          headers
+        }
+      );
+    }
   } catch (error) {
-    console.error('Error in GET handler:', error);
+    console.error('API: Error in GET handler:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }), 
       {
