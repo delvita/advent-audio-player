@@ -75,11 +75,11 @@ const parseFeedItem = (item: Element): FeedItem => {
 };
 
 export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, string] }): Promise<Chapter[]> => {
-  const [_, feedUrl] = queryKey;
   let lastError: FeedError | null = null;
   
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
+      const [_, feedUrl] = queryKey;
       const proxyUrl = `https://mf1.ch/crosproxy/?${feedUrl}`;
       console.log(`Attempt ${attempt + 1}: Fetching feed from ${proxyUrl}`);
       
