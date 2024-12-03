@@ -3,29 +3,17 @@ import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
 
 interface EmbedCodesProps {
-  colors: {
-    background: string;
-    text: string;
-    primary: string;
-    secondary: string;
-  };
-  listHeight: string;
-  sortAscending: boolean;
-  showFirstPost: boolean;
+  embedId: string;
 }
 
-export const EmbedCodes = ({ colors, listHeight, sortAscending, showFirstPost }: EmbedCodesProps) => {
+export const EmbedCodes = ({ embedId }: EmbedCodesProps) => {
   const { toast } = useToast();
   const baseUrl = window.location.origin;
   
-  const getQueryString = () => {
-    return `bg=${encodeURIComponent(colors.background)}&text=${encodeURIComponent(colors.text)}&primary=${encodeURIComponent(colors.primary)}&secondary=${encodeURIComponent(colors.secondary)}&height=${listHeight}&sortAsc=${sortAscending}&showFirst=${showFirstPost}`;
-  };
-
   const iframeCode = `<iframe 
-  src="${baseUrl}/embed?${getQueryString()}"
+  src="${baseUrl}/embed/${embedId}"
   width="100%"
-  height="${parseInt(listHeight) + 400}px"
+  height="800px"
   frameborder="0"
 ></iframe>`;
 
@@ -35,7 +23,7 @@ export const EmbedCodes = ({ colors, listHeight, sortAscending, showFirstPost }:
     var script = document.createElement('script');
     script.src = '${baseUrl}/embed.js';
     script.async = true;
-    script.dataset.config = '${getQueryString()}';
+    script.dataset.embedId = '${embedId}';
     document.head.appendChild(script);
   })();
 </script>`;

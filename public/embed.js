@@ -3,14 +3,14 @@
   if (!container) return;
 
   const script = document.currentScript;
-  const config = script.dataset.config;
+  const embedId = script.dataset.embedId;
   const baseUrl = script.src.replace('/embed.js', '');
   
   const iframe = document.createElement('iframe');
-  iframe.src = `${baseUrl}/embed?${config}`;
+  iframe.src = `${baseUrl}/embed/${embedId}`;
   iframe.style.width = '100%';
   iframe.style.border = 'none';
-  iframe.style.height = (parseInt(new URLSearchParams(config).get('height') || '600') + 400) + 'px';
+  iframe.style.height = '800px';
   
   container.appendChild(iframe);
 })();

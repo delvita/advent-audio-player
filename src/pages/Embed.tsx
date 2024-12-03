@@ -1,49 +1,52 @@
-import { useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import AudioPlayer from '@/components/AudioPlayer';
 import ChapterList from '@/components/ChapterList';
 import { useQuery } from '@tanstack/react-query';
 import { getFeedItems } from '@/services/feedService';
+import { getSettingsById } from '@/services/settingsService';
+import type { PlayerSettings } from '@/types/playerSettings';
 
 const Embed = () => {
-  const [searchParams] = useSearchParams();
+  const { embedId } = useParams();
   const [activeChapter, setActiveChapter] = useState<any>();
+  const [settings, setSettings] = useState<PlayerSettings | null>(null);
   
-  // Get settings from URL params
-  const bg = searchParams.get('bg') || '#ffffff';
-  const text = searchParams.get('text') || '#000000';
-  const primary = searchParams.get('primary') || '#9b87f5';
-  const secondary = searchParams.get('secondary') || '#7E69AB';
-  const listHeight = searchParams.get('height') || '600';
-  const sortAsc = searchParams.get('sortAsc') === 'true';
-  const showFirst = searchParams.get('showFirst') === 'true';
+  useEffect(() => {
+    if (embedId) {
+      const loadedSettings = getSettingsById(embedId);
+      if (loadedSettings) {
+        setSettings(loadedSettings);
+      }
+    }
+  }, [embedId]);
 
   const { data: chapters = [], isLoading } = useQuery({
-    queryKey: ['feed-items'],
-    queryFn: getFeedItems
+    queryKey: ['feed-items', settings?.feedUrl],
+    queryFn: () => settings?.feedUrl ? getFeedItems(settings.feedUrl) : Promise.resolve([]),
+    enabled: !!settings?.feedUrl
   });
 
   useEffect(() => {
-    if (chapters.length > 0) {
-      // Set initial chapter based on settings
-      const initialChapter = showFirst ? chapters[chapters.length - 1] : chapters[0];
+    if (chapters.length > 0 && settings) {
+      const initialChapter = settings.showFirstPost ? chapters[chapters.length - 1] : chapters[0];
       setActiveChapter(initialChapter);
     }
-  }, [chapters, showFirst]);
+  }, [chapters, settings?.showFirstPost]);
 
   const sortedChapters = [...chapters];
-  if (sortAsc) {
+  if (settings?.sortAscending) {
     sortedChapters.reverse();
   }
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading || !settings) return <div>Loading...</div>;
 
   return (
     <div style={{
-      '--player-bg': bg,
-      '--player-text': text,
-      '--player-primary': primary,
-      '--player-secondary': secondary,
+      '--player-bg': settings.colors.background,
+      '--player-text': settings.colors.text,
+      '--player-primary': settings.colors.primary,
+      '--player-secondary': settings.colors.secondary,
     } as React.CSSProperties}>
       {activeChapter && (
         <AudioPlayer
@@ -52,12 +55,14 @@ const Embed = () => {
           image={activeChapter.image}
         />
       )}
-      <ChapterList
-        chapters={sortedChapters}
-        onChapterSelect={setActiveChapter}
-        activeChapter={activeChapter}
-        maxHeight={parseInt(listHeight)}
-      />
+      <div className="mt-2.5">
+        <ChapterList
+          chapters={sortedChapters}
+          onChapterSelect={setActiveChapter}
+          activeChapter={activeChapter}
+          maxHeight={parseInt(settings.listHeight)}
+        />
+      </div>
     </div>
   );
 };
