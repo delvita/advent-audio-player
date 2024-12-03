@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Card, CardContent } from "../components/ui/card";
-import { ColorSettings } from "../components/ColorSettings";
-import { PlayerSettings as PlayerSettingsComponent } from "../components/PlayerSettings";
-import { EmbedCodes } from "../components/EmbedCodes";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-import { Label } from "../components/ui/label";
+import { Card, CardContent } from "./ui/card";
+import { ColorSettings } from "./ColorSettings";
+import { PlayerSettings as PlayerSettingsComponent } from "./PlayerSettings";
+import { EmbedCodes } from "./EmbedCodes";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Label } from "./ui/label";
 import type { PlayerSettings } from '../types/playerSettings';
 
 interface SettingsFormProps {
