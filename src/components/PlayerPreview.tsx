@@ -33,13 +33,13 @@ export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHei
       return;
     }
     
-    // Nur setzen wenn kein initialChapter vorhanden ist
-    if (!initialChapter && chapters.length > 0) {
+    // Wenn kein aktives Kapitel gesetzt ist, wählen wir eines basierend auf showFirstPost
+    if (!activeChapter) {
       const defaultChapter = showFirstPost ? chapters[chapters.length - 1] : chapters[0];
       console.log('Setting default chapter:', defaultChapter);
       setActiveChapter(defaultChapter);
     }
-  }, [chapters, showFirstPost, initialChapter]); // activeChapter aus den Dependencies entfernt
+  }, [chapters, showFirstPost, initialChapter, activeChapter]);
 
   const handleChapterSelect = (chapter: Chapter) => {
     console.log('Chapter selected:', chapter);
