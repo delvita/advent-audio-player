@@ -14,10 +14,11 @@ const Embed = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load settings first
   useEffect(() => {
     const loadSettings = async () => {
       if (embedId) {
+        setIsLoading(true);
+        setError(null);
         try {
           const loadedSettings = await getSettingsById(embedId);
           if (loadedSettings) {
@@ -48,13 +49,13 @@ const Embed = () => {
 
   // Set initial chapter
   useEffect(() => {
-    if (sortedChapters.length > 0 && settings && !activeChapter) {
+    if (!activeChapter && sortedChapters.length > 0 && settings) {
       const initialChapter = settings.showFirstPost 
         ? sortedChapters[sortedChapters.length - 1] 
         : sortedChapters[0];
       setActiveChapter(initialChapter);
     }
-  }, [sortedChapters.length, settings]);
+  }, [sortedChapters, settings, activeChapter]);
 
   if (isLoading) {
     return <div className="p-4">Lädt...</div>;
