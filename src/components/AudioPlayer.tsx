@@ -25,10 +25,11 @@ const AudioPlayer = ({ src, title, image, autoPlay = false }: AudioPlayerProps) 
       audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
       
       if (autoPlay) {
-        audioRef.current.play().catch(() => {
-          // Silently handle autoplay restriction without showing error
-          setIsPlaying(false);
-        });
+        audioRef.current.play()
+          .catch(() => {
+            // Silently handle autoplay restriction without showing error
+            setIsPlaying(false);
+          });
       }
       
       return () => {
