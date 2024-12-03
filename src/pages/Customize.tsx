@@ -75,8 +75,8 @@ const Customize = () => {
     });
   };
 
-  const handleLoadSettings = (id: string) => {
-    const loadedSettings = getSettingsById(id);
+  const handleLoadSettings = async (id: string) => {
+    const loadedSettings = await getSettingsById(id);
     if (loadedSettings) {
       setSettings(loadedSettings);
     }
