@@ -24,7 +24,6 @@ export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHei
   useEffect(() => {
     console.log('useEffect running with:', {
       chaptersLength: chapters.length,
-      activeChapter,
       initialChapter,
       showFirstPost
     });
@@ -34,12 +33,13 @@ export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHei
       return;
     }
     
-    if (!activeChapter && chapters.length > 0) {
+    // Nur setzen wenn kein initialChapter vorhanden ist
+    if (!initialChapter && chapters.length > 0) {
       const defaultChapter = showFirstPost ? chapters[chapters.length - 1] : chapters[0];
       console.log('Setting default chapter:', defaultChapter);
       setActiveChapter(defaultChapter);
     }
-  }, [chapters, showFirstPost, activeChapter]);
+  }, [chapters, showFirstPost, initialChapter]); // activeChapter aus den Dependencies entfernt
 
   const handleChapterSelect = (chapter: Chapter) => {
     console.log('Chapter selected:', chapter);
