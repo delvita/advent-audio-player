@@ -47,16 +47,15 @@ const Embed = () => {
     enabled: !!settings?.feedUrl
   });
 
-  // Process chapters and set initial chapter
+  // Set initial chapter only when chapters or settings change
   useEffect(() => {
     if (!chapters.length || !settings) return;
-
-    const sortedChapters = settings.sortAscending ? [...chapters].reverse() : chapters;
     
     if (!activeChapter) {
+      const sortedChaps = settings.sortAscending ? [...chapters].reverse() : chapters;
       const initialChapter = settings.showFirstPost 
-        ? sortedChapters[sortedChapters.length - 1] 
-        : sortedChapters[0];
+        ? sortedChaps[sortedChaps.length - 1] 
+        : sortedChaps[0];
       setActiveChapter(initialChapter);
     }
   }, [chapters, settings]);
