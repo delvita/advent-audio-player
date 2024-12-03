@@ -18,22 +18,24 @@ export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHei
     listHeight 
   });
 
-  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(initialChapter);
+  // Initialisiere activeChapter direkt mit einem berechneten Wert
+  const getInitialChapter = () => {
+    if (initialChapter) return initialChapter;
+    if (chapters.length === 0) return undefined;
+    return showFirstPost ? chapters[chapters.length - 1] : chapters[0];
+  };
+
+  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(getInitialChapter());
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
+  // Aktualisiere activeChapter nur wenn sich die relevanten Props ändern
   useEffect(() => {
-    if (chapters.length === 0) {
-      console.log('No chapters available, returning');
-      return;
+    const newChapter = getInitialChapter();
+    if (!activeChapter && newChapter) {
+      console.log('Updating active chapter:', newChapter);
+      setActiveChapter(newChapter);
     }
-
-    // Nur setzen wenn kein aktives Kapitel vorhanden ist
-    if (!activeChapter) {
-      const defaultChapter = initialChapter || (showFirstPost ? chapters[chapters.length - 1] : chapters[0]);
-      console.log('Setting default chapter:', defaultChapter);
-      setActiveChapter(defaultChapter);
-    }
-  }, [chapters, showFirstPost, initialChapter]); // activeChapter bewusst ausgelassen
+  }, [chapters, showFirstPost, initialChapter]); // activeChapter absichtlich ausgelassen
 
   const handleChapterSelect = (chapter: Chapter) => {
     console.log('Chapter selected:', chapter);
