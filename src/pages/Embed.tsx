@@ -9,8 +9,8 @@ import type { PlayerSettings } from '@/types/playerSettings';
 
 const Embed = () => {
   const { embedId } = useParams();
-  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(undefined);
   const [settings, setSettings] = useState<PlayerSettings | null>(null);
+  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,19 +45,15 @@ const Embed = () => {
     enabled: !!settings?.feedUrl
   });
 
-  // Sort chapters based on settings
-  const sortedChapters = [...chapters];
-  if (settings?.sortAscending) {
-    sortedChapters.reverse();
-  }
+  // Sort chapters and set initial chapter
+  const sortedChapters = settings?.sortAscending ? [...chapters].reverse() : chapters;
 
-  // Set initial chapter
   useEffect(() => {
-    if (sortedChapters.length > 0 && settings) {
+    if (sortedChapters.length > 0 && settings && !activeChapter) {
       const initialChapter = settings.showFirstPost ? sortedChapters[sortedChapters.length - 1] : sortedChapters[0];
       setActiveChapter(initialChapter);
     }
-  }, [sortedChapters, settings?.showFirstPost]);
+  }, [sortedChapters, settings, activeChapter]);
 
   if (isLoading) {
     return <div className="p-4">Lädt...</div>;
