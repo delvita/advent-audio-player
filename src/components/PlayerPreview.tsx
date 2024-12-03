@@ -27,12 +27,13 @@ export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHei
       return;
     }
 
+    // Nur setzen wenn kein aktives Kapitel vorhanden ist
     if (!activeChapter) {
       const defaultChapter = initialChapter || (showFirstPost ? chapters[chapters.length - 1] : chapters[0]);
       console.log('Setting default chapter:', defaultChapter);
       setActiveChapter(defaultChapter);
     }
-  }, [chapters, showFirstPost, initialChapter, activeChapter]);
+  }, [chapters, showFirstPost, initialChapter]); // activeChapter bewusst ausgelassen
 
   const handleChapterSelect = (chapter: Chapter) => {
     console.log('Chapter selected:', chapter);
