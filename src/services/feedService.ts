@@ -3,7 +3,7 @@ import { Chapter } from '@/components/ChapterList';
 export const getFeedItems = async (context?: { queryKey: string[] }): Promise<Chapter[]> => {
   try {
     const feedUrl = context?.queryKey?.[1] || 'https://wirfamilien.ch/tag/advent/feed';
-    const proxyUrl = 'https://mf1.ch/crosproxy/?https://wirfamilien.ch/tag/advent/feed';
+    const proxyUrl = `https://mf1.ch/crosproxy/?${feedUrl}`;
     
     const response = await fetch(proxyUrl);
 
