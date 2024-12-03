@@ -14,12 +14,6 @@ const Embed = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: chapters = [] } = useQuery({
-    queryKey: ['feed-items', settings?.feedUrl],
-    queryFn: () => getFeedItems({ queryKey: ['feed-items', settings?.feedUrl || ''] }),
-    enabled: !!settings?.feedUrl
-  });
-
   useEffect(() => {
     const loadSettings = async () => {
       if (embedId) {
@@ -42,6 +36,12 @@ const Embed = () => {
     
     loadSettings();
   }, [embedId]);
+
+  const { data: chapters = [] } = useQuery({
+    queryKey: ['feed-items', settings?.feedUrl],
+    queryFn: () => getFeedItems({ queryKey: ['feed-items', settings?.feedUrl || ''] }),
+    enabled: !!settings?.feedUrl
+  });
 
   // Sort chapters based on settings
   const sortedChapters = [...chapters];
