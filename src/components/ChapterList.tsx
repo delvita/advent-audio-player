@@ -18,7 +18,7 @@ interface ChapterListProps {
 
 const ChapterList = ({ chapters, onChapterSelect, activeChapter, maxHeight = 600 }: ChapterListProps) => {
   return (
-    <ScrollArea className={`h-[${maxHeight}px] w-full rounded-md border`}>
+    <ScrollArea className={`w-full h-[${maxHeight}px] rounded-md border`}>
       <div className="space-y-0">
         {chapters.map((chapter, index) => (
           <div 
