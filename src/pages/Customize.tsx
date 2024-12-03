@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { PlayerSettings as PlayerSettingsType } from '@/types/playerSettings';
 import { generateEmbedId, saveSettings, getAllSettings, getSettingsById, deleteSettings } from '@/services/settingsService';
 import { TemplatesList } from "@/components/TemplatesList";
+import { Card } from "@/components/ui/card";
 
 const Customize = () => {
   const { toast } = useToast();
@@ -73,19 +74,6 @@ const Customize = () => {
     }
   });
 
-  const handleSaveSettings = () => {
-    if (!settings.name) {
-      toast({
-        title: "Error",
-        description: "Bitte geben Sie einen Namen für die Einstellungen ein",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    saveMutation.mutate(settings);
-  };
-
   const handleLoadSettings = async (id: string) => {
     try {
       const loadedSettings = await getSettingsById(id);
@@ -137,19 +125,24 @@ const Customize = () => {
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold mb-4">Vorschau</h2>
-          <div style={{
-            '--player-bg': settings.colors.background,
-            '--player-text': settings.colors.text,
-            '--player-primary': settings.colors.primary,
-            '--player-secondary': settings.colors.secondary,
-          } as React.CSSProperties}>
-            <PlayerPreview
-              chapters={sortedChapters}
-              showFirstPost={settings.showFirstPost}
-              listHeight={settings.listHeight}
-            />
-          </div>
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Vorschau</h2>
+            <div 
+              className="rounded-lg overflow-hidden"
+              style={{
+                '--player-bg': settings.colors.background,
+                '--player-text': settings.colors.text,
+                '--player-primary': settings.colors.primary,
+                '--player-secondary': settings.colors.secondary,
+              } as React.CSSProperties}
+            >
+              <PlayerPreview
+                chapters={sortedChapters}
+                showFirstPost={settings.showFirstPost}
+                listHeight={settings.listHeight}
+              />
+            </div>
+          </Card>
         </div>
       </div>
     </div>
