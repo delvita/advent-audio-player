@@ -49,9 +49,8 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
     // If not in localStorage, try the API endpoint
     console.log('Fetching settings from API for ID:', id);
     
-    // Get the base URL from the current window location
-    const baseUrl = window.location.origin;
-    const apiUrl = `${baseUrl}/api/settings/${id}`;
+    // Use the fixed domain for the audio player
+    const apiUrl = 'https://advent-audio-player.lovable.app/api/settings/' + id;
     console.log('API URL:', apiUrl);
     
     const response = await fetch(apiUrl, {
