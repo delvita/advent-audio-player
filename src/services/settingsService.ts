@@ -35,7 +35,7 @@ export const getAllSettings = (): PlayerSettings[] => {
   }
 };
 
-export const getSettingsById = async (id: string): Promise<PlayerSettings | null> => {
+export const getSettingsById = (id: string): PlayerSettings | null => {
   try {
     const localSettings = localStorage.getItem(`settings_${id}`);
     if (localSettings) {
