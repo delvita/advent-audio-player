@@ -47,18 +47,17 @@ const Embed = () => {
     enabled: !!settings?.feedUrl
   });
 
-  // Set initial chapter only when chapters or settings change
+  // Set initial chapter only when chapters or settings change, and no active chapter exists
   useEffect(() => {
-    if (!chapters.length || !settings) return;
+    if (!chapters.length || !settings || activeChapter) return;
     
-    if (!activeChapter) {
-      const sortedChaps = settings.sortAscending ? [...chapters].reverse() : chapters;
-      const initialChapter = settings.showFirstPost 
-        ? sortedChaps[sortedChaps.length - 1] 
-        : sortedChaps[0];
-      setActiveChapter(initialChapter);
-    }
-  }, [chapters, settings]);
+    const sortedChaps = settings.sortAscending ? [...chapters].reverse() : chapters;
+    const initialChapter = settings.showFirstPost 
+      ? sortedChaps[sortedChaps.length - 1] 
+      : sortedChaps[0];
+    
+    setActiveChapter(initialChapter);
+  }, [chapters, settings, activeChapter]);
 
   if (isLoading) {
     return <div className="p-4">Lädt...</div>;
