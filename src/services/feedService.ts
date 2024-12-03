@@ -4,6 +4,7 @@ import type { FeedItem, FeedError, XMLParseResult } from '@/types/feed';
 const TIMEOUT_DURATION = 10000; // 10 seconds
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
+const PROXY_URL = 'https://mf1.ch/crosproxy/?';
 
 const delay = (ms: number): Promise<void> => 
   new Promise(resolve => setTimeout(resolve, ms));
@@ -75,8 +76,7 @@ const parseFeedItem = (item: Element): FeedItem => {
   const title = item.querySelector('title')?.textContent || 'Untitled';
   const audioUrl = item.querySelector('enclosure')?.getAttribute('url') || '';
   const imageUrl = item.querySelector('media\\:content, content')?.getAttribute('url') ||
-                  (item.querySelector('content\\:encoded, description')?.textContent && 
-                   extractImageUrl(item.querySelector('content\\:encoded, description')?.textContent || ''));
+                  extractImageUrl(item.querySelector('content\\:encoded, description')?.textContent || '');
   const publishDate = item.querySelector('pubDate')?.textContent;
 
   return { title, audioUrl, imageUrl, publishDate };
@@ -88,7 +88,7 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
   
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const proxyUrl = `https://mf1.ch/crosproxy/?${feedUrl}`;
+      const proxyUrl = `${PROXY_URL}${feedUrl}`;
       const response = await fetchWithTimeout(proxyUrl);
       const text = await response.text();
       const parseResult = parseXMLSafely(text);
@@ -116,8 +116,7 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
         createFeedError('Unknown error occurred', 'UNKNOWN', error);
       
       if (attempt < MAX_RETRIES - 1) {
-        const backoffDelay = RETRY_DELAY * Math.pow(2, attempt);
-        await delay(backoffDelay);
+        await delay(RETRY_DELAY * Math.pow(2, attempt));
         continue;
       }
     }
