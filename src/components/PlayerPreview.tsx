@@ -1,7 +1,7 @@
 import AudioPlayer from '@/components/AudioPlayer';
 import ChapterList from '@/components/ChapterList';
 import { Chapter } from '@/components/ChapterList';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface PlayerPreviewProps {
   chapters: Chapter[];
@@ -16,6 +16,13 @@ export const PlayerPreview = ({ chapters, showFirstPost, listHeight }: PlayerPre
 
   const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(initialChapter);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
+
+  useEffect(() => {
+    const newInitialChapter = showFirstPost && chapters.length > 0 
+      ? chapters[chapters.length - 1] 
+      : chapters[0];
+    setActiveChapter(newInitialChapter);
+  }, [chapters, showFirstPost]);
 
   const handleChapterSelect = (chapter: Chapter) => {
     setActiveChapter(chapter);
