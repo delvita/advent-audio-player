@@ -17,12 +17,12 @@ export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHei
   useEffect(() => {
     if (chapters.length === 0) return;
     
-    // Nur setzen wenn kein Kapitel aktiv ist und chapters verfügbar sind
-    if (!activeChapter && chapters.length > 0) {
+    // Nur setzen wenn chapters verfügbar sind und kein initialChapter gesetzt wurde
+    if (chapters.length > 0 && !initialChapter) {
       const defaultChapter = showFirstPost ? chapters[chapters.length - 1] : chapters[0];
       setActiveChapter(defaultChapter);
     }
-  }, [chapters, showFirstPost]); // activeChapter aus dependencies entfernt
+  }, [chapters, showFirstPost, initialChapter]);
 
   const handleChapterSelect = (chapter: Chapter) => {
     setActiveChapter(chapter);
