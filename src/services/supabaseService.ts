@@ -1,51 +1,73 @@
 import { supabase } from "@/integrations/supabase/client";
 import { PlayerSettings } from "@/types/playerSettings";
-import { Database } from "@/integrations/supabase/types";
 
-type DbPlayerSettings = Database['public']['Tables']['player_settings']['Row'];
-
-const mapDbToPlayerSettings = (dbSettings: DbPlayerSettings): PlayerSettings => {
-  const colors = typeof dbSettings.colors === 'string' 
-    ? JSON.parse(dbSettings.colors) 
-    : dbSettings.colors;
-
-  const playerType = dbSettings.player_type as PlayerSettings['playerType'];
-  if (!['big', 'medium', 'small'].includes(playerType)) {
-    throw new Error(`Invalid player type: ${playerType}`);
-  }
-
-  return {
-    id: dbSettings.id,
-    name: dbSettings.name,
-    feedUrl: dbSettings.feed_url,
-    colors: colors as PlayerSettings['colors'],
-    listHeight: dbSettings.list_height,
-    sortAscending: dbSettings.sort_ascending,
-    showFirstPost: dbSettings.show_first_post,
-    playerType
+// Type for the database row
+type DbPlayerSettings = {
+  id: string;
+  name: string;
+  feed_url: string;
+  colors: {
+    background: string;
+    text: string;
+    primary: string;
+    secondary: string;
   };
+  list_height: string;
+  sort_ascending: boolean;
+  show_first_post: boolean;
+  player_type: "big" | "medium" | "small";
 };
 
-const mapPlayerSettingsToDb = (settings: PlayerSettings): Database['public']['Tables']['player_settings']['Insert'] => {
-  return {
-    id: settings.id,
-    name: settings.name,
-    feed_url: settings.feedUrl,
-    colors: settings.colors,
-    list_height: settings.listHeight,
-    sort_ascending: settings.sortAscending,
-    show_first_post: settings.showFirstPost,
-    player_type: settings.playerType
-  };
-};
+// Convert database row to PlayerSettings
+const toPlayerSettings = (dbSettings: DbPlayerSettings): PlayerSettings => ({
+  id: dbSettings.id,
+  name: dbSettings.name,
+  feedUrl: dbSettings.feed_url,
+  colors: dbSettings.colors,
+  listHeight: dbSettings.list_height,
+  sortAscending: dbSettings.sort_ascending,
+  showFirstPost: dbSettings.show_first_post,
+  playerType: dbSettings.player_type,
+});
+
+// Convert PlayerSettings to database format
+const toDbFormat = (settings: PlayerSettings): Omit<DbPlayerSettings, 'id'> => ({
+  name: settings.name,
+  feed_url: settings.feedUrl,
+  colors: settings.colors,
+  list_height: settings.listHeight,
+  sort_ascending: settings.sortAscending,
+  show_first_post: settings.showFirstPost,
+  player_type: settings.playerType,
+});
 
 export const saveSettings = async (settings: PlayerSettings): Promise<void> => {
-  const dbSettings = mapPlayerSettingsToDb(settings);
   const { error } = await supabase
     .from('player_settings')
-    .upsert(dbSettings);
+    .upsert({
+      id: settings.id,
+      ...toDbFormat(settings)
+    });
 
   if (error) throw error;
+};
+
+export const deleteSettings = async (id: string): Promise<void> => {
+  const { error } = await supabase
+    .from('player_settings')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+};
+
+export const getAllSettings = async (): Promise<PlayerSettings[]> => {
+  const { data, error } = await supabase
+    .from('player_settings')
+    .select('*');
+
+  if (error) throw error;
+  return (data as DbPlayerSettings[]).map(toPlayerSettings);
 };
 
 export const getSettingsById = async (id: string): Promise<PlayerSettings | null> => {
@@ -56,27 +78,5 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
     .single();
 
   if (error) throw error;
-  if (!data) return null;
-
-  return mapDbToPlayerSettings(data);
-};
-
-export const getAllSettings = async (): Promise<PlayerSettings[]> => {
-  const { data, error } = await supabase
-    .from('player_settings')
-    .select('*');
-
-  if (error) throw error;
-  if (!data) return [];
-
-  return data.map(mapDbToPlayerSettings);
-};
-
-export const deleteSettings = async (id: string): Promise<void> => {
-  const { error } = await supabase
-    .from('player_settings')
-    .delete()
-    .eq('id', id);
-
-  if (error) throw error;
+  return data ? toPlayerSettings(data as DbPlayerSettings) : null;
 };
