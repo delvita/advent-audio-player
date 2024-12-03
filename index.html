@@ -11,21 +11,6 @@
 
   <body>
     <div id="root"></div>
-    <script>
-      // Safely load gptengineer.js if we're not in preview mode
-      try {
-        if (window.location && !window.location.href.includes('preview--')) {
-          const script = document.createElement('script');
-          script.src = 'https://cdn.gpteng.co/gptengineer.js';
-          script.type = 'module';
-          script.async = true;
-          script.onerror = (error) => console.error('Failed to load gptengineer.js:', error);
-          document.body.appendChild(script);
-        }
-      } catch (error) {
-        console.error('Error while loading gptengineer.js:', error);
-      }
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
