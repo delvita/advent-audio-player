@@ -13,7 +13,13 @@ const Embed = () => {
   const [settings, setSettings] = useState<PlayerSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
+  const { data: chapters = [] } = useQuery({
+    queryKey: ['feed-items', settings?.feedUrl],
+    queryFn: () => getFeedItems({ queryKey: ['feed-items', settings?.feedUrl || ''] }),
+    enabled: !!settings?.feedUrl
+  });
+
   useEffect(() => {
     const loadSettings = async () => {
       if (embedId) {
@@ -27,7 +33,6 @@ const Embed = () => {
             setError('Keine Einstellungen gefunden');
           }
         } catch (err) {
-          console.error('Error loading settings:', err);
           setError('Fehler beim Laden der Einstellungen');
         } finally {
           setIsLoading(false);
@@ -37,12 +42,6 @@ const Embed = () => {
     
     loadSettings();
   }, [embedId]);
-
-  const { data: chapters = [] } = useQuery({
-    queryKey: ['feed-items', settings?.feedUrl],
-    queryFn: () => getFeedItems({ queryKey: ['feed-items', settings?.feedUrl || ''] }),
-    enabled: !!settings?.feedUrl
-  });
 
   // Sort chapters based on settings
   const sortedChapters = [...chapters];
