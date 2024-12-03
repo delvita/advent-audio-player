@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import AudioPlayer from '@/components/AudioPlayer';
 import ChapterList, { Chapter } from '@/components/ChapterList';
 import { useQuery } from '@tanstack/react-query';
@@ -14,37 +14,46 @@ const Embed = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Load settings
   useEffect(() => {
     const loadSettings = async () => {
-      if (embedId) {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const loadedSettings = await getSettingsById(embedId);
-          if (loadedSettings) {
-            setSettings(loadedSettings);
-          } else {
-            setError('Keine Einstellungen gefunden');
-          }
-        } catch (err) {
-          setError('Fehler beim Laden der Einstellungen');
-        } finally {
-          setIsLoading(false);
+      if (!embedId) return;
+      
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const loadedSettings = await getSettingsById(embedId);
+        if (loadedSettings) {
+          setSettings(loadedSettings);
+        } else {
+          setError('Keine Einstellungen gefunden');
         }
+      } catch (err) {
+        setError('Fehler beim Laden der Einstellungen');
+        console.error('Settings loading error:', err);
+      } finally {
+        setIsLoading(false);
       }
     };
     
     loadSettings();
   }, [embedId]);
 
+  // Load chapters
   const { data: chapters = [] } = useQuery({
     queryKey: ['feed-items', settings?.feedUrl],
     queryFn: () => getFeedItems({ queryKey: ['feed-items', settings?.feedUrl || ''] }),
     enabled: !!settings?.feedUrl
   });
 
-  const sortedChapters = settings?.sortAscending ? [...chapters].reverse() : chapters;
+  // Sort chapters using useMemo to prevent unnecessary recalculations
+  const sortedChapters = useMemo(() => {
+    if (!chapters.length) return [];
+    return settings?.sortAscending ? [...chapters].reverse() : chapters;
+  }, [chapters, settings?.sortAscending]);
 
+  // Set initial chapter only when chapters or settings change
   useEffect(() => {
     if (!activeChapter && sortedChapters.length > 0 && settings) {
       const initialChapter = settings.showFirstPost 
