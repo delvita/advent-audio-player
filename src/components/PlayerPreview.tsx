@@ -14,7 +14,7 @@ export const PlayerPreview = ({ chapters, showFirstPost, listHeight }: PlayerPre
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
   useEffect(() => {
-    if (chapters.length === 0) {
+    if (!chapters || chapters.length === 0) {
       setActiveChapter(undefined);
       return;
     }
@@ -28,7 +28,7 @@ export const PlayerPreview = ({ chapters, showFirstPost, listHeight }: PlayerPre
     setShouldAutoPlay(true);
   };
 
-  if (!chapters.length) {
+  if (!chapters || chapters.length === 0) {
     return <div className="p-4">Keine Kapitel verfügbar</div>;
   }
 
