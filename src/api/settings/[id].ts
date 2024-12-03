@@ -5,10 +5,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const id = params.id;
     console.log('Attempting to get settings for ID:', id);
     
-    // Get settings from localStorage
-    const settings = localStorage.getItem(`settings_${id}`);
-    console.log('Retrieved settings from localStorage:', settings);
-    
     // Define headers with correct content type and CORS
     const headers = new Headers({
       'Content-Type': 'application/json',
@@ -16,6 +12,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     });
+
+    // Get settings from localStorage
+    const settings = localStorage.getItem(`settings_${id}`);
+    console.log('Retrieved settings from localStorage:', settings);
     
     if (!settings) {
       console.log('No settings found for ID:', id);
@@ -28,20 +28,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       );
     }
     
-    // Ensure we're returning valid JSON
-    try {
-      JSON.parse(settings);
-    } catch (e) {
-      console.error('Invalid JSON in localStorage:', e);
-      return new Response(
-        JSON.stringify({ error: 'Invalid settings data' }),
-        {
-          status: 500,
-          headers
-        }
-      );
-    }
-    
+    // Return the settings with proper headers
     return new Response(
       settings,
       { 
