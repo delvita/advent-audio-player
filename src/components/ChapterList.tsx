@@ -12,7 +12,7 @@ export interface Chapter {
 interface ChapterListProps {
   chapters: Chapter[];
   onChapterSelect: (chapter: Chapter) => void;
-  activeChapter?: Chapter | null;
+  activeChapter: Chapter | null;
   maxHeight?: number;
 }
 
