@@ -11,20 +11,38 @@ interface PlayerPreviewProps {
 }
 
 export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHeight }: PlayerPreviewProps) => {
+  console.log('PlayerPreview rendering with props:', { 
+    chaptersLength: chapters.length, 
+    initialChapter, 
+    showFirstPost, 
+    listHeight 
+  });
+
   const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(initialChapter);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
   useEffect(() => {
-    if (chapters.length === 0) return;
+    console.log('useEffect running with:', {
+      chaptersLength: chapters.length,
+      activeChapter,
+      initialChapter,
+      showFirstPost
+    });
+
+    if (chapters.length === 0) {
+      console.log('No chapters available, returning');
+      return;
+    }
     
-    // Nur setzen wenn chapters verfügbar sind und kein initialChapter gesetzt wurde
-    if (chapters.length > 0 && !initialChapter) {
+    if (!activeChapter && chapters.length > 0) {
       const defaultChapter = showFirstPost ? chapters[chapters.length - 1] : chapters[0];
+      console.log('Setting default chapter:', defaultChapter);
       setActiveChapter(defaultChapter);
     }
-  }, [chapters, showFirstPost, initialChapter]);
+  }, [chapters, showFirstPost, activeChapter]);
 
   const handleChapterSelect = (chapter: Chapter) => {
+    console.log('Chapter selected:', chapter);
     setActiveChapter(chapter);
     setShouldAutoPlay(true);
   };
