@@ -3,17 +3,9 @@ import { Chapter } from '@/components/ChapterList';
 export const getFeedItems = async (context?: { queryKey: string[] }): Promise<Chapter[]> => {
   try {
     const feedUrl = context?.queryKey?.[1] || 'https://wirfamilien.ch/tag/advent/feed';
+    const proxyUrl = 'https://mf1.ch/crosproxy/?https://wirfamilien.ch/tag/advent/feed';
     
-    // Try direct fetch first
-    let response: Response;
-    try {
-      response = await fetch(feedUrl);
-    } catch (error) {
-      // If direct fetch fails, try with specified CORS proxy
-      console.log('Direct fetch failed, trying CORS proxy...');
-      const corsProxy = 'https://mf1.ch/crosproxy/?';
-      response = await fetch(corsProxy + feedUrl);
-    }
+    const response = await fetch(proxyUrl);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
