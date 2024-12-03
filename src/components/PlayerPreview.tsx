@@ -27,13 +27,12 @@ export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHei
       return;
     }
 
-    // Setze das aktive Kapitel nur beim ersten Laden oder wenn es zurückgesetzt wurde
     if (!activeChapter) {
       const defaultChapter = initialChapter || (showFirstPost ? chapters[chapters.length - 1] : chapters[0]);
       console.log('Setting default chapter:', defaultChapter);
       setActiveChapter(defaultChapter);
     }
-  }, [chapters, showFirstPost, initialChapter]); // activeChapter bewusst ausgelassen um Render-Zyklus zu vermeiden
+  }, [chapters, showFirstPost, initialChapter, activeChapter]);
 
   const handleChapterSelect = (chapter: Chapter) => {
     console.log('Chapter selected:', chapter);
