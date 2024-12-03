@@ -5,8 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getFeedItems } from '@/services/feedService';
 import { getSettingsById } from '@/services/settingsService';
 import type { PlayerSettings } from '@/types/playerSettings';
-import type { PlayerCSSProperties } from '@/types/css';
-import { useToast } from '@/components/ui/use-toast';
+import type { PlayerCSSProperties } from '@/types/styles';
+import { useToast } from '@/hooks/use-toast';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const Embed = () => {
@@ -16,15 +16,30 @@ const Embed = () => {
 
   useEffect(() => {
     const loadSettings = async () => {
-      if (!embedId) return;
+      if (!embedId) {
+        toast({
+          title: "Fehler",
+          description: "Keine Player-ID gefunden",
+          variant: "destructive"
+        });
+        return;
+      }
       
       try {
         const loadedSettings = await getSettingsById(embedId);
+        if (!loadedSettings) {
+          toast({
+            title: "Fehler",
+            description: "Player-Einstellungen nicht gefunden",
+            variant: "destructive"
+          });
+          return;
+        }
         setSettings(loadedSettings);
       } catch (err) {
         toast({
-          title: "Error",
-          description: "Failed to load player settings",
+          title: "Fehler",
+          description: "Fehler beim Laden der Player-Einstellungen",
           variant: "destructive"
         });
         console.error('Settings loading error:', err);
@@ -34,27 +49,59 @@ const Embed = () => {
     loadSettings();
   }, [embedId, toast]);
 
-  const { data: chapters = [], isLoading } = useQuery({
+  const { 
+    data: chapters = [], 
+    isLoading, 
+    isError,
+    error 
+  } = useQuery({
     queryKey: ['feed-items', settings?.feedUrl],
     queryFn: () => getFeedItems({ queryKey: ['feed-items', settings?.feedUrl || ''] }),
     enabled: !!settings?.feedUrl,
     meta: {
-      onError: () => {
+      onError: (err: Error) => {
         toast({
-          title: "Error",
-          description: "Failed to load audio chapters",
+          title: "Fehler",
+          description: "Fehler beim Laden der Audio-Kapitel",
           variant: "destructive"
         });
+        console.error('Feed loading error:', err);
       }
     }
   });
 
   if (isLoading) {
-    return <div className="p-4">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-full w-full p-4">
+        <p className="text-muted-foreground">Lädt...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center h-full w-full p-4">
+        <p className="text-destructive">
+          {error instanceof Error ? error.message : 'Unbekannter Fehler beim Laden der Audio-Kapitel'}
+        </p>
+      </div>
+    );
   }
 
   if (!settings) {
-    return <div className="p-4">No settings found</div>;
+    return (
+      <div className="flex items-center justify-center h-full w-full p-4">
+        <p className="text-muted-foreground">Keine Player-Einstellungen gefunden</p>
+      </div>
+    );
+  }
+
+  if (!Array.isArray(chapters) || chapters.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full w-full p-4">
+        <p className="text-muted-foreground">Keine Audio-Kapitel verfügbar</p>
+      </div>
+    );
   }
 
   const sortedChapters = settings.sortAscending ? [...chapters].reverse() : chapters;
@@ -73,6 +120,7 @@ const Embed = () => {
           chapters={sortedChapters}
           showFirstPost={settings.showFirstPost}
           listHeight={settings.listHeight}
+          style={playerStyle}
         />
       </div>
     </ErrorBoundary>
