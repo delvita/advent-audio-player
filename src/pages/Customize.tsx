@@ -74,6 +74,19 @@ const Customize = () => {
     }
   });
 
+  const handleSaveSettings = () => {
+    if (!settings.name) {
+      toast({
+        title: "Error",
+        description: "Bitte geben Sie einen Namen für die Einstellungen ein",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    saveMutation.mutate(settings);
+  };
+
   const handleLoadSettings = async (id: string) => {
     try {
       const loadedSettings = await getSettingsById(id);
