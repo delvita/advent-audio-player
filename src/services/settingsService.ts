@@ -1,7 +1,6 @@
 import { PlayerSettings } from '@/types/playerSettings';
 
 const SETTINGS_KEY = 'player_settings';
-const API_BASE_URL = 'https://lovable.dev/api'; // Beispiel-URL, muss an Ihre tatsächliche API-URL angepasst werden
 
 export const generateEmbedId = (): string => {
   return Math.random().toString(36).substring(2, 15);
@@ -38,7 +37,6 @@ export const getAllSettings = (): PlayerSettings[] => {
 
 export const getSettingsById = async (id: string): Promise<PlayerSettings | null> => {
   try {
-    // Zuerst im localStorage suchen
     const localSettings = localStorage.getItem(`settings_${id}`);
     if (localSettings) {
       const settings = JSON.parse(localSettings);
@@ -46,7 +44,6 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
       return settings;
     }
     
-    // Wenn keine lokalen Einstellungen gefunden wurden, null zurückgeben
     console.log('No settings found for ID:', id);
     return null;
   } catch (error) {
