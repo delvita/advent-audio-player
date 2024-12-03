@@ -58,3 +58,5 @@ export const PlayerPreview = ({
     </div>
   );
 };
+
+export default PlayerPreview;
