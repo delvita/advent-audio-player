@@ -69,6 +69,7 @@ const Embed = () => {
           src={activeChapter.audioSrc}
           title={activeChapter.title}
           image={activeChapter.image}
+          autoPlay={false}
         />
       )}
       <div className="mt-2.5">

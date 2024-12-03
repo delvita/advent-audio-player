@@ -34,6 +34,7 @@ const Index = () => {
             src={activeChapter.audioSrc}
             title={activeChapter.title}
             image={activeChapter.image}
+            autoPlay={false}
           />
         )}
         <ChapterList
