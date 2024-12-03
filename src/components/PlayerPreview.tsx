@@ -17,14 +17,12 @@ export const PlayerPreview = ({
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
   useEffect(() => {
-    const chapterList = Array.isArray(chapters) ? chapters : [];
-    
-    if (chapterList.length === 0) {
+    if (!Array.isArray(chapters) || chapters.length === 0) {
       setActiveChapter(null);
       return;
     }
 
-    const initialChapter = showFirstPost ? chapterList[chapterList.length - 1] : chapterList[0];
+    const initialChapter = showFirstPost ? chapters[chapters.length - 1] : chapters[0];
     if (initialChapter) {
       setActiveChapter(initialChapter);
     }
@@ -35,9 +33,7 @@ export const PlayerPreview = ({
     setShouldAutoPlay(true);
   };
 
-  const chapterList = Array.isArray(chapters) ? chapters : [];
-
-  if (chapterList.length === 0) {
+  if (!Array.isArray(chapters) || chapters.length === 0) {
     return <div className="p-4">Keine Kapitel verfügbar</div>;
   }
 
@@ -53,7 +49,7 @@ export const PlayerPreview = ({
       )}
       <div className="mt-2.5">
         <ChapterList
-          chapters={chapterList}
+          chapters={chapters}
           onChapterSelect={handleChapterSelect}
           activeChapter={activeChapter}
           maxHeight={parseInt(listHeight)}
