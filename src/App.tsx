@@ -18,7 +18,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/customize" element={<Customize />} />
-          <Route path="/embed" element={<Embed />} />
+          <Route path="/embed/:embedId" element={<Embed />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
