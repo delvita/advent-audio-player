@@ -36,11 +36,13 @@ const Index = () => {
   useEffect(() => {
     if (chapters.length > 0 && !activeChapter) {
       setActiveChapter(chapters[0]);
+      console.log('Setting initial chapter:', chapters[0]);
     }
   }, [chapters, activeChapter]);
 
   const handleChapterSelect = (chapter: Chapter) => {
     if (!chapter) return;
+    console.log('Selected chapter:', chapter);
     setActiveChapter(chapter);
   };
 
