@@ -3,13 +3,12 @@ import AudioPlayer from '@/components/AudioPlayer';
 import ChapterList from '@/components/ChapterList';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import type { Chapter, PlayerPreviewProps } from '@/types/player';
-import type { PlayerCSSProperties } from '@/types/styles';
 
 export const PlayerPreview = ({ 
   chapters = [], 
-  showFirstPost, 
-  listHeight,
-  style 
+  showFirstPost = false, 
+  listHeight = '600',
+  style = {} 
 }: PlayerPreviewProps) => {
   const [activeChapter, setActiveChapter] = useState<Chapter | null>(null);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
@@ -23,10 +22,13 @@ export const PlayerPreview = ({
     const initialChapter = showFirstPost ? chapters[chapters.length - 1] : chapters[0];
     if (initialChapter) {
       setActiveChapter(initialChapter);
+      console.log('Setting initial chapter:', initialChapter);
     }
   }, [chapters, showFirstPost]);
 
   const handleChapterSelect = (chapter: Chapter) => {
+    if (!chapter) return;
+    console.log('Selected chapter:', chapter);
     setActiveChapter(chapter);
     setShouldAutoPlay(true);
   };
