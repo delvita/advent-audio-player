@@ -37,25 +37,22 @@ const Embed = () => {
     loadSettings();
   }, [embedId]);
 
-  // Fetch chapters using the settings
   const { data: chapters = [] } = useQuery({
     queryKey: ['feed-items', settings?.feedUrl],
     queryFn: () => getFeedItems({ queryKey: ['feed-items', settings?.feedUrl || ''] }),
     enabled: !!settings?.feedUrl
   });
 
-  // Sort chapters based on settings
   const sortedChapters = settings?.sortAscending ? [...chapters].reverse() : chapters;
 
-  // Set initial chapter
   useEffect(() => {
-    if (!activeChapter && sortedChapters.length > 0 && settings) {
+    if (sortedChapters.length > 0 && settings && !activeChapter) {
       const initialChapter = settings.showFirstPost 
         ? sortedChapters[sortedChapters.length - 1] 
         : sortedChapters[0];
       setActiveChapter(initialChapter);
     }
-  }, [sortedChapters, settings, activeChapter]);
+  }, [sortedChapters.length, settings]);
 
   if (isLoading) {
     return <div className="p-4">Lädt...</div>;
