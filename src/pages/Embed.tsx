@@ -1,13 +1,13 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { PlayerPreview } from '@/components/PlayerPreview';
+import { PlayerPreview } from '../components/PlayerPreview';
 import { useQuery } from '@tanstack/react-query';
-import { getFeedItems } from '@/services/feedService';
-import { getSettingsById } from '@/services/settingsService';
-import { useToast } from '@/hooks/use-toast';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import type { PlayerSettings } from '@/types/settings';
-import type { PlayerCSSProperties } from '@/types/styles';
+import { getFeedItems } from '../services/feedService';
+import { getSettingsById } from '../services/settingsService';
+import { useToast } from '../hooks/use-toast';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+import type { PlayerSettings } from '../types/settings';
+import type { PlayerCSSProperties } from '../types/styles';
 
 const Embed = () => {
   const { embedId } = useParams();

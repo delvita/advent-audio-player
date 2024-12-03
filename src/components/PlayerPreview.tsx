@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import AudioPlayer from '@/components/AudioPlayer';
-import ChapterList from '@/components/ChapterList';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import type { Chapter, PlayerPreviewProps } from '@/types/player';
+import AudioPlayer from '../components/AudioPlayer';
+import ChapterList from '../components/ChapterList';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+import type { Chapter, PlayerPreviewProps } from '../types/player';
 
 export const PlayerPreview = ({ 
   chapters = [], 

@@ -1,13 +1,13 @@
-import { SettingsForm } from "@/components/SettingsForm";
-import { PlayerPreview } from '@/components/PlayerPreview';
+import { SettingsForm } from "../components/SettingsForm";
+import { PlayerPreview } from '../components/PlayerPreview';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getFeedItems } from '@/services/feedService';
+import { getFeedItems } from '../services/feedService';
 import { useState } from 'react';
-import { useToast } from "@/hooks/use-toast";
-import { PlayerSettings as PlayerSettingsType } from '@/types/playerSettings';
-import { generateEmbedId, saveSettings, getAllSettings, getSettingsById, deleteSettings } from '@/services/settingsService';
-import { TemplatesList } from "@/components/TemplatesList";
-import { Card } from "@/components/ui/card";
+import { useToast } from "../hooks/use-toast";
+import { PlayerSettings as PlayerSettingsType } from '../types/playerSettings';
+import { generateEmbedId, saveSettings, getAllSettings, getSettingsById, deleteSettings } from '../services/settingsService';
+import { TemplatesList } from "../components/TemplatesList";
+import { Card } from "../components/ui/card";
 
 const Customize = () => {
   const { toast } = useToast();

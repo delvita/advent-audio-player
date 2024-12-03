@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
+import { Button } from "../components/ui/button";
 import { Play, Pause, SkipForward, SkipBack } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
-import { useToast } from "@/hooks/use-toast";
+import { Slider } from "../components/ui/slider";
+import { useToast } from "../hooks/use-toast";
 
 interface AudioPlayerProps {
   src: string;
