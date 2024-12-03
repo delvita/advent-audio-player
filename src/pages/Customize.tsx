@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { PlayerSettings as PlayerSettingsType } from '@/types/playerSettings';
-import { generateEmbedId, saveSettings, getAllSettings, getSettingsById } from '@/services/settingsService';
+import { generateEmbedId, saveSettings, getAllSettings, getSettingsById, deleteSettings } from '@/services/settingsService';
+import { Trash2 } from "lucide-react";
 
 const Customize = () => {
   const { toast } = useToast();
@@ -61,7 +62,7 @@ const Customize = () => {
     if (!settings.name) {
       toast({
         title: "Error",
-        description: "Please enter a name for your settings",
+        description: "Bitte geben Sie einen Namen für die Einstellungen ein",
         variant: "destructive"
       });
       return;
@@ -70,8 +71,8 @@ const Customize = () => {
     saveSettings(settings);
     setSavedSettings(getAllSettings());
     toast({
-      title: "Success",
-      description: "Settings saved successfully"
+      title: "Erfolg",
+      description: "Einstellungen wurden erfolgreich gespeichert"
     });
   };
 
@@ -79,6 +80,22 @@ const Customize = () => {
     const loadedSettings = await getSettingsById(id);
     if (loadedSettings) {
       setSettings(loadedSettings);
+    }
+  };
+
+  const handleDeleteSettings = () => {
+    if (settings.id) {
+      deleteSettings(settings.id);
+      setSavedSettings(getAllSettings());
+      setSettings({
+        ...settings,
+        id: generateEmbedId(),
+        name: ''
+      });
+      toast({
+        title: "Erfolg",
+        description: "Einstellungen wurden erfolgreich gelöscht"
+      });
     }
   };
 
@@ -91,19 +108,19 @@ const Customize = () => {
               <div className="space-y-4">
                 <div className="flex gap-4">
                   <div className="flex-1">
-                    <Label htmlFor="settingsName">Settings Name</Label>
+                    <Label htmlFor="settingsName">Name der Einstellungen</Label>
                     <Input
                       id="settingsName"
                       value={settings.name}
                       onChange={(e) => setSettings({ ...settings, name: e.target.value })}
-                      placeholder="My Custom Player"
+                      placeholder="Mein Custom Player"
                     />
                   </div>
                   <div className="flex-1">
-                    <Label>Saved Settings</Label>
+                    <Label>Gespeicherte Einstellungen</Label>
                     <Select onValueChange={handleLoadSettings} value={settings.id}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select saved settings" />
+                        <SelectValue placeholder="Gespeicherte Einstellungen auswählen" />
                       </SelectTrigger>
                       <SelectContent>
                         {savedSettings.map((s) => (
@@ -141,9 +158,18 @@ const Customize = () => {
                   onPlayerTypeChange={(type) => setSettings({ ...settings, playerType: type })}
                 />
 
-                <Button onClick={handleSaveSettings} className="w-full">
-                  Save Settings
-                </Button>
+                <div className="flex gap-4">
+                  <Button onClick={handleSaveSettings} className="flex-1">
+                    Einstellungen speichern
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    onClick={handleDeleteSettings}
+                    className="w-auto"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
 
                 <EmbedCodes embedId={settings.id} />
               </div>
@@ -152,7 +178,7 @@ const Customize = () => {
         </Card>
 
         <div>
-          <h2 className="text-xl font-semibold mb-4">Preview</h2>
+          <h2 className="text-xl font-semibold mb-4">Vorschau</h2>
           <div style={{
             '--player-bg': settings.colors.background,
             '--player-text': settings.colors.text,
