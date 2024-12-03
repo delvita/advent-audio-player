@@ -8,9 +8,10 @@ interface AudioPlayerProps {
   src: string;
   title: string;
   image?: string;
+  autoPlay?: boolean;
 }
 
-const AudioPlayer = ({ src, title, image }: AudioPlayerProps) => {
+const AudioPlayer = ({ src, title, image, autoPlay = false }: AudioPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -21,8 +22,9 @@ const AudioPlayer = ({ src, title, image }: AudioPlayerProps) => {
       audioRef.current.addEventListener('timeupdate', handleTimeUpdate);
       audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
       
-      // Auto-play when src changes
-      audioRef.current.play().then(() => setIsPlaying(true));
+      if (autoPlay) {
+        audioRef.current.play().then(() => setIsPlaying(true));
+      }
       
       return () => {
         if (audioRef.current) {
@@ -31,7 +33,7 @@ const AudioPlayer = ({ src, title, image }: AudioPlayerProps) => {
         }
       };
     }
-  }, [src]);
+  }, [src, autoPlay]);
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {

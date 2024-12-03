@@ -173,6 +173,7 @@ const Customize = () => {
                 src={activeChapter.audioSrc}
                 title={activeChapter.title}
                 image={activeChapter.image}
+                autoPlay={true}
               />
             )}
             <div className="mt-2.5">

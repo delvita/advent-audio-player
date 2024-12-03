@@ -17,22 +17,17 @@ interface ChapterListProps {
 }
 
 const ChapterList = ({ chapters, onChapterSelect, activeChapter, maxHeight = 600 }: ChapterListProps) => {
-  const heightClasses = {
+  const heightClasses: Record<string, string> = {
     '300': 'h-[300px]',
     '400': 'h-[400px]',
     '500': 'h-[500px]',
     '600': 'h-[600px]',
     '700': 'h-[700px]'
-  } as const;
-  
-  type ValidHeight = keyof typeof heightClasses;
+  };
   
   const getHeightClass = (height: number): string => {
     const heightStr = height.toString();
-    if (heightStr in heightClasses) {
-      return heightClasses[heightStr as ValidHeight];
-    }
-    return heightClasses['600'];
+    return heightClasses[heightStr] || heightClasses['600'];
   };
   
   return (
