@@ -25,7 +25,6 @@ const fetchWithTimeout = async (url: string): Promise<Response> => {
     clearTimeout(timeoutId);
     
     if (!response.ok) {
-      console.error(`HTTP error! status: ${response.status}`);
       throw createFeedError(
         `HTTP error! status: ${response.status}`,
         'NETWORK'
@@ -36,7 +35,6 @@ const fetchWithTimeout = async (url: string): Promise<Response> => {
     return response;
   } catch (error) {
     clearTimeout(timeoutId);
-    console.error('Error during fetch:', error);
     
     if (error instanceof Error && error.name === 'AbortError') {
       throw createFeedError('Request timed out', 'TIMEOUT');
@@ -53,7 +51,6 @@ const parseXMLSafely = (text: string): XMLParseResult => {
     
     const parseError = xmlDoc.querySelector('parsererror');
     if (parseError) {
-      console.error('XML parsing error:', parseError.textContent);
       return {
         success: false,
         error: parseError.textContent || 'Unknown XML parsing error'
@@ -66,7 +63,6 @@ const parseXMLSafely = (text: string): XMLParseResult => {
       document: xmlDoc
     };
   } catch (error) {
-    console.error('Error during XML parsing:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown parsing error'
@@ -81,23 +77,22 @@ const extractImageUrl = (content: string): string | undefined => {
 
 const parseFeedItem = (item: Element): FeedItem => {
   const title = item.querySelector('title')?.textContent || 'Untitled';
-  const audioUrl = item.querySelector('enclosure')?.getAttribute('url') || null;
+  const audioUrl = item.querySelector('enclosure')?.getAttribute('url') || '';
   const imageUrl = item.querySelector('media\\:content, content')?.getAttribute('url') ||
                   (item.querySelector('content\\:encoded, description')?.textContent && 
                    extractImageUrl(item.querySelector('content\\:encoded, description')?.textContent || ''));
   const publishDate = item.querySelector('pubDate')?.textContent;
-  const content = item.querySelector('content\\:encoded, description')?.textContent;
 
   console.log(`Parsed feed item: ${title}`);
-  return { title, audioUrl, imageUrl, publishDate, content };
+  return { title, audioUrl, imageUrl, publishDate };
 };
 
 export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, string] }): Promise<Chapter[]> => {
+  const [_, feedUrl] = queryKey;
   let lastError: FeedError | null = null;
   
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const [_, feedUrl] = queryKey;
       console.log(`Attempt ${attempt + 1}: Fetching feed from ${feedUrl}`);
       
       const proxyUrl = `https://mf1.ch/crosproxy/?${feedUrl}`;
@@ -120,7 +115,7 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
 
       return items.map(item => ({
         title: item.title,
-        audioSrc: item.audioUrl || '',
+        audioSrc: item.audioUrl,
         image: item.imageUrl,
         publishDate: item.publishDate
       }));
@@ -139,6 +134,5 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
     }
   }
 
-  console.error('All retry attempts failed');
   throw lastError || createFeedError('Failed to fetch feed after multiple attempts', 'UNKNOWN');
 };

@@ -1,9 +1,8 @@
 export interface FeedItem {
   title: string;
-  audioUrl: string | null;
+  audioUrl: string;
   imageUrl?: string;
   publishDate?: string;
-  content?: string;
 }
 
 export type FeedError = Error & {
