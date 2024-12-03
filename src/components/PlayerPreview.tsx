@@ -1,7 +1,7 @@
 import AudioPlayer from '@/components/AudioPlayer';
 import ChapterList from '@/components/ChapterList';
 import { Chapter } from '@/components/ChapterList';
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 interface PlayerPreviewProps {
   chapters: Chapter[];
@@ -11,34 +11,19 @@ interface PlayerPreviewProps {
 }
 
 export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHeight }: PlayerPreviewProps) => {
-  console.log('PlayerPreview rendering with props:', { 
-    chaptersLength: chapters.length, 
-    initialChapter, 
-    showFirstPost, 
-    listHeight 
-  });
-
-  // Initialisiere activeChapter direkt mit einem berechneten Wert
-  const getInitialChapter = () => {
+  // Memoize the getInitialChapter function
+  const getInitialChapter = useCallback(() => {
     if (initialChapter) return initialChapter;
     if (chapters.length === 0) return undefined;
     return showFirstPost ? chapters[chapters.length - 1] : chapters[0];
-  };
+  }, [chapters, initialChapter, showFirstPost]);
 
-  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(getInitialChapter());
+  // Initialize states
+  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(() => getInitialChapter());
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
-  // Aktualisiere activeChapter nur wenn sich die relevanten Props ändern
-  useEffect(() => {
-    const newChapter = getInitialChapter();
-    if (!activeChapter && newChapter) {
-      console.log('Updating active chapter:', newChapter);
-      setActiveChapter(newChapter);
-    }
-  }, [chapters, showFirstPost, initialChapter]); // activeChapter absichtlich ausgelassen
-
+  // Handle chapter selection
   const handleChapterSelect = (chapter: Chapter) => {
-    console.log('Chapter selected:', chapter);
     setActiveChapter(chapter);
     setShouldAutoPlay(true);
   };
