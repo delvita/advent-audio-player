@@ -20,11 +20,24 @@ const fetchWithTimeout = async (url: string): Promise<Response> => {
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_DURATION);
 
   try {
+    console.log(`Fetching feed from URL: ${url}`);
     const response = await fetch(url, { signal: controller.signal });
     clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      console.error(`HTTP error! status: ${response.status}`);
+      throw createFeedError(
+        `HTTP error! status: ${response.status}`,
+        'NETWORK'
+      );
+    }
+    
+    console.log('Feed fetched successfully');
     return response;
   } catch (error) {
     clearTimeout(timeoutId);
+    console.error('Error during fetch:', error);
+    
     if (error instanceof Error && error.name === 'AbortError') {
       throw createFeedError('Request timed out', 'TIMEOUT');
     }
@@ -34,22 +47,26 @@ const fetchWithTimeout = async (url: string): Promise<Response> => {
 
 const parseXMLSafely = (text: string): XMLParseResult => {
   try {
+    console.log('Attempting to parse XML');
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(text, 'text/xml');
     
     const parseError = xmlDoc.querySelector('parsererror');
     if (parseError) {
+      console.error('XML parsing error:', parseError.textContent);
       return {
         success: false,
         error: parseError.textContent || 'Unknown XML parsing error'
       };
     }
 
+    console.log('XML parsed successfully');
     return {
       success: true,
       document: xmlDoc
     };
   } catch (error) {
+    console.error('Error during XML parsing:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown parsing error'
@@ -63,15 +80,16 @@ const extractImageUrl = (content: string): string | undefined => {
 };
 
 const parseFeedItem = (item: Element): FeedItem => {
-  return {
-    title: item.querySelector('title')?.textContent || 'Untitled',
-    audioUrl: item.querySelector('enclosure')?.getAttribute('url') || null,
-    imageUrl: item.querySelector('media\\:content, content')?.getAttribute('url') ||
-             (item.querySelector('content\\:encoded, description')?.textContent && 
-              extractImageUrl(item.querySelector('content\\:encoded, description')?.textContent || '')),
-    publishDate: item.querySelector('pubDate')?.textContent,
-    content: item.querySelector('content\\:encoded, description')?.textContent
-  };
+  const title = item.querySelector('title')?.textContent || 'Untitled';
+  const audioUrl = item.querySelector('enclosure')?.getAttribute('url') || null;
+  const imageUrl = item.querySelector('media\\:content, content')?.getAttribute('url') ||
+                  (item.querySelector('content\\:encoded, description')?.textContent && 
+                   extractImageUrl(item.querySelector('content\\:encoded, description')?.textContent || ''));
+  const publishDate = item.querySelector('pubDate')?.textContent;
+  const content = item.querySelector('content\\:encoded, description')?.textContent;
+
+  console.log(`Parsed feed item: ${title}`);
+  return { title, audioUrl, imageUrl, publishDate, content };
 };
 
 export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, string] }): Promise<Chapter[]> => {
@@ -84,14 +102,6 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
       
       const proxyUrl = `https://mf1.ch/crosproxy/?${feedUrl}`;
       const response = await fetchWithTimeout(proxyUrl);
-      
-      if (!response.ok) {
-        throw createFeedError(
-          `HTTP error! status: ${response.status}`,
-          'NETWORK'
-        );
-      }
-
       const text = await response.text();
       const parseResult = parseXMLSafely(text);
       
@@ -104,7 +114,9 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
 
       const items = Array.from(parseResult.document.querySelectorAll('item'))
         .map(parseFeedItem)
-        .filter(item => item.audioUrl); // Only include items with audio
+        .filter(item => item.audioUrl);
+
+      console.log(`Successfully processed ${items.length} feed items`);
 
       return items.map(item => ({
         title: item.title,
@@ -113,6 +125,7 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
         publishDate: item.publishDate
       }));
     } catch (error) {
+      console.error(`Attempt ${attempt + 1} failed:`, error);
       lastError = error instanceof Error ? 
         createFeedError(error.message, 'UNKNOWN', error) :
         createFeedError('Unknown error occurred', 'UNKNOWN', error);
