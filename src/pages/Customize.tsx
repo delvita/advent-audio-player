@@ -160,7 +160,6 @@ const Customize = () => {
           } as React.CSSProperties}>
             <PlayerPreview
               chapters={sortedChapters}
-              initialChapter={settings.showFirstPost ? sortedChapters[sortedChapters.length - 1] : sortedChapters[0]}
               showFirstPost={settings.showFirstPost}
               listHeight={settings.listHeight}
             />
