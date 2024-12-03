@@ -36,6 +36,7 @@ const Customize = () => {
   
   const [savedSettings, setSavedSettings] = useState<PlayerSettingsType[]>([]);
   const [activeChapter, setActiveChapter] = useState<any>();
+  const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
   const { data: chapters = [] } = useQuery({
     queryKey: ['feed-items', settings.feedUrl],
@@ -50,6 +51,7 @@ const Customize = () => {
     if (chapters.length > 0) {
       const initialChapter = settings.showFirstPost ? chapters[chapters.length - 1] : chapters[0];
       setActiveChapter(initialChapter);
+      setShouldAutoPlay(false); // Reset autoPlay when loading initial chapter
     }
   }, [chapters, settings.showFirstPost]);
 
@@ -80,6 +82,7 @@ const Customize = () => {
     const loadedSettings = await getSettingsById(id);
     if (loadedSettings) {
       setSettings(loadedSettings);
+      setShouldAutoPlay(false); // Reset autoPlay when loading settings
     }
   };
 
@@ -97,6 +100,11 @@ const Customize = () => {
       title: "Erfolg",
       description: "Einstellungen wurden erfolgreich gelöscht"
     });
+  };
+
+  const handleChapterSelect = (chapter: any) => {
+    setActiveChapter(chapter);
+    setShouldAutoPlay(true); // Only enable autoPlay when selecting a chapter
   };
 
   return (
@@ -173,13 +181,13 @@ const Customize = () => {
                 src={activeChapter.audioSrc}
                 title={activeChapter.title}
                 image={activeChapter.image}
-                autoPlay={true}
+                autoPlay={shouldAutoPlay}
               />
             )}
             <div className="mt-2.5">
               <ChapterList
                 chapters={sortedChapters}
-                onChapterSelect={setActiveChapter}
+                onChapterSelect={handleChapterSelect}
                 activeChapter={activeChapter}
                 maxHeight={parseInt(settings.listHeight)}
               />
