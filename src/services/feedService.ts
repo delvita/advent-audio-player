@@ -3,12 +3,33 @@ import { Chapter } from '@/components/ChapterList';
 export const getFeedItems = async (context?: { queryKey: string[] }): Promise<Chapter[]> => {
   try {
     const feedUrl = context?.queryKey?.[1] || 'https://wirfamilien.ch/tag/advent/feed';
-    const corsProxy = 'https://mf1.ch/crosproxy/?';
-    const response = await fetch(corsProxy + feedUrl);
+    
+    // Try direct fetch first
+    let response: Response;
+    try {
+      response = await fetch(feedUrl);
+    } catch (error) {
+      // If direct fetch fails, try with CORS Anywhere as fallback
+      console.log('Direct fetch failed, trying CORS proxy...');
+      const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+      response = await fetch(corsProxy + feedUrl);
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
     const text = await response.text();
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(text, 'text/xml');
+    
+    if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+      console.error('XML parsing error:', xmlDoc.getElementsByTagName('parsererror')[0].textContent);
+      return [];
+    }
+
     const items = xmlDoc.querySelectorAll('item');
+    console.log(`Found ${items.length} items in feed`);
 
     return Array.from(items).map(item => {
       // Get title
