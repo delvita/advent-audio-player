@@ -11,15 +11,22 @@ interface PlayerPreviewProps {
 }
 
 export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHeight }: PlayerPreviewProps) => {
-  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(initialChapter);
+  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(undefined);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
   useEffect(() => {
+    // Wenn ein initialChapter vorhanden ist, nutzen wir dieses
+    if (initialChapter) {
+      setActiveChapter(initialChapter);
+      return;
+    }
+    
+    // Ansonsten wählen wir basierend auf showFirstPost
     if (chapters.length > 0 && !activeChapter) {
       const defaultChapter = showFirstPost ? chapters[chapters.length - 1] : chapters[0];
       setActiveChapter(defaultChapter);
     }
-  }, [chapters, showFirstPost]);
+  }, [chapters, showFirstPost, initialChapter]);
 
   const handleChapterSelect = (chapter: Chapter) => {
     setActiveChapter(chapter);
