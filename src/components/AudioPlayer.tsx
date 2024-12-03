@@ -25,9 +25,8 @@ const AudioPlayer = ({ src, title, image, autoPlay = false }: AudioPlayerProps) 
       audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
       
       if (autoPlay) {
-        audioRef.current.play().catch(error => {
-          console.log('Autoplay prevented:', error);
-          // Don't show error toast as this is expected behavior
+        audioRef.current.play().catch(() => {
+          // Silently handle autoplay restriction without showing error
           setIsPlaying(false);
         });
       }
