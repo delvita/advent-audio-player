@@ -2,8 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ColorSettings } from "@/components/ColorSettings";
 import { PlayerSettings } from "@/components/PlayerSettings";
 import { EmbedCodes } from "@/components/EmbedCodes";
-import AudioPlayer from '@/components/AudioPlayer';
-import ChapterList from '@/components/ChapterList';
+import { PlayerPreview } from '@/components/PlayerPreview';
 import { useQuery } from '@tanstack/react-query';
 import { getFeedItems } from '@/services/feedService';
 import { useState, useEffect } from 'react';
@@ -13,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { PlayerSettings as PlayerSettingsType } from '@/types/playerSettings';
 import { generateEmbedId, saveSettings, getAllSettings, getSettingsById, deleteSettings } from '@/services/settingsService';
-import { Trash2 } from "lucide-react";
 import { TemplatesList } from "@/components/TemplatesList";
 
 const Customize = () => {
@@ -35,8 +33,6 @@ const Customize = () => {
   });
   
   const [savedSettings, setSavedSettings] = useState<PlayerSettingsType[]>([]);
-  const [activeChapter, setActiveChapter] = useState<any>();
-  const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
   const { data: chapters = [] } = useQuery({
     queryKey: ['feed-items', settings.feedUrl],
@@ -46,14 +42,6 @@ const Customize = () => {
   useEffect(() => {
     setSavedSettings(getAllSettings());
   }, []);
-
-  useEffect(() => {
-    if (chapters.length > 0) {
-      const initialChapter = settings.showFirstPost ? chapters[chapters.length - 1] : chapters[0];
-      setActiveChapter(initialChapter);
-      setShouldAutoPlay(false); // Reset autoPlay when loading initial chapter
-    }
-  }, [chapters, settings.showFirstPost]);
 
   const sortedChapters = [...chapters];
   if (settings.sortAscending) {
@@ -82,7 +70,6 @@ const Customize = () => {
     const loadedSettings = await getSettingsById(id);
     if (loadedSettings) {
       setSettings(loadedSettings);
-      setShouldAutoPlay(false); // Reset autoPlay when loading settings
     }
   };
 
@@ -100,11 +87,6 @@ const Customize = () => {
       title: "Erfolg",
       description: "Einstellungen wurden erfolgreich gelöscht"
     });
-  };
-
-  const handleChapterSelect = (chapter: any) => {
-    setActiveChapter(chapter);
-    setShouldAutoPlay(true); // Only enable autoPlay when selecting a chapter
   };
 
   return (
@@ -176,22 +158,12 @@ const Customize = () => {
             '--player-primary': settings.colors.primary,
             '--player-secondary': settings.colors.secondary,
           } as React.CSSProperties}>
-            {activeChapter && (
-              <AudioPlayer
-                src={activeChapter.audioSrc}
-                title={activeChapter.title}
-                image={activeChapter.image}
-                autoPlay={shouldAutoPlay}
-              />
-            )}
-            <div className="mt-2.5">
-              <ChapterList
-                chapters={sortedChapters}
-                onChapterSelect={handleChapterSelect}
-                activeChapter={activeChapter}
-                maxHeight={parseInt(settings.listHeight)}
-              />
-            </div>
+            <PlayerPreview
+              chapters={sortedChapters}
+              initialChapter={settings.showFirstPost ? sortedChapters[sortedChapters.length - 1] : sortedChapters[0]}
+              showFirstPost={settings.showFirstPost}
+              listHeight={settings.listHeight}
+            />
           </div>
         </div>
       </div>
