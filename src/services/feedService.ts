@@ -9,9 +9,9 @@ export const getFeedItems = async (context?: { queryKey: string[] }): Promise<Ch
     try {
       response = await fetch(feedUrl);
     } catch (error) {
-      // If direct fetch fails, try with CORS Anywhere as fallback
+      // If direct fetch fails, try with specified CORS proxy
       console.log('Direct fetch failed, trying CORS proxy...');
-      const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+      const corsProxy = 'https://mf1.ch/crosproxy/?';
       response = await fetch(corsProxy + feedUrl);
     }
 
