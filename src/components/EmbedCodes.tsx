@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { Card } from "@/components/ui/card";
+import { Button } from "./ui/button";
+import { useToast } from "./ui/use-toast";
+import { Card } from "./ui/card";
 
 interface EmbedCodesProps {
   embedId: string;
