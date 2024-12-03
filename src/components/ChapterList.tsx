@@ -18,20 +18,21 @@ interface ChapterListProps {
 
 const ChapterList = ({ chapters, onChapterSelect, activeChapter, maxHeight = 600 }: ChapterListProps) => {
   const heightClasses = {
-    300: 'h-[300px]',
-    400: 'h-[400px]',
-    500: 'h-[500px]',
-    600: 'h-[600px]',
-    700: 'h-[700px]'
+    '300': 'h-[300px]',
+    '400': 'h-[400px]',
+    '500': 'h-[500px]',
+    '600': 'h-[600px]',
+    '700': 'h-[700px]'
   } as const;
   
   type ValidHeight = keyof typeof heightClasses;
   
   const getHeightClass = (height: number): string => {
-    if (Object.keys(heightClasses).includes(height.toString())) {
-      return heightClasses[height as ValidHeight];
+    const heightStr = height.toString();
+    if (heightStr in heightClasses) {
+      return heightClasses[heightStr as ValidHeight];
     }
-    return heightClasses[600];
+    return heightClasses['600'];
   };
   
   return (
