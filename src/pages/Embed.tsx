@@ -1,41 +1,28 @@
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import AudioPlayer from '@/components/AudioPlayer';
 import ChapterList from '@/components/ChapterList';
 import { useQuery } from '@tanstack/react-query';
 import { getFeedItems } from '@/services/feedService';
-import { getSettingsById, decodeSettings } from '@/services/settingsService';
+import { getSettingsById } from '@/services/settingsService';
 import type { PlayerSettings } from '@/types/playerSettings';
 
 const Embed = () => {
   const { embedId } = useParams();
-  const [searchParams] = useSearchParams();
   const [activeChapter, setActiveChapter] = useState<any>();
   const [settings, setSettings] = useState<PlayerSettings | null>(null);
   
   useEffect(() => {
     if (embedId) {
-      // First try to get settings from URL parameter
-      const encodedSettings = searchParams.get('settings');
-      if (encodedSettings) {
-        const decodedSettings = decodeSettings(encodedSettings);
-        if (decodedSettings) {
-          console.log('Settings loaded from URL parameter:', decodedSettings);
-          setSettings(decodedSettings);
-          return;
-        }
-      }
-
-      // Fallback to localStorage if URL parameter is not available
       const loadedSettings = getSettingsById(embedId);
       if (loadedSettings) {
-        console.log('Settings loaded from localStorage:', loadedSettings);
+        console.log('Settings loaded:', loadedSettings);
         setSettings(loadedSettings);
       } else {
         console.log('No settings found for ID:', embedId);
       }
     }
-  }, [embedId, searchParams]);
+  }, [embedId]);
 
   const { data: chapters = [], isLoading } = useQuery({
     queryKey: ['feed-items', settings?.feedUrl],

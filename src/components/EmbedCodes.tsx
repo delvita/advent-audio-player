@@ -1,8 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Card } from "@/components/ui/card";
-import { encodeSettings } from "@/services/settingsService";
-import { getSettingsById } from "@/services/settingsService";
 
 interface EmbedCodesProps {
   embedId: string;
@@ -11,11 +9,9 @@ interface EmbedCodesProps {
 export const EmbedCodes = ({ embedId }: EmbedCodesProps) => {
   const { toast } = useToast();
   const baseUrl = window.location.origin;
-  const settings = getSettingsById(embedId);
-  const encodedSettings = settings ? encodeSettings(settings) : '';
   
   const iframeCode = `<iframe 
-  src="${baseUrl}/embed/${embedId}?settings=${encodedSettings}"
+  src="${baseUrl}/embed/${embedId}"
   width="100%"
   height="800px"
   frameborder="0"
@@ -28,7 +24,6 @@ export const EmbedCodes = ({ embedId }: EmbedCodesProps) => {
     script.src = '${baseUrl}/embed.js';
     script.async = true;
     script.dataset.embedId = '${embedId}';
-    script.dataset.settings = '${encodedSettings}';
     document.head.appendChild(script);
   })();
 </script>`;
