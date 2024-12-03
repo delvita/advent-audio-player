@@ -25,7 +25,9 @@ export const PlayerPreview = ({
     }
 
     const initialChapter = showFirstPost ? chapterList[chapterList.length - 1] : chapterList[0];
-    setActiveChapter(initialChapter);
+    if (initialChapter && initialChapter.audioSrc) {
+      setActiveChapter(initialChapter);
+    }
   }, [chapters, showFirstPost]);
 
   const handleChapterSelect = (chapter: Chapter) => {
