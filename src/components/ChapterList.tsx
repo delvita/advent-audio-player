@@ -1,13 +1,7 @@
 import React from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { format } from 'date-fns';
-
-export interface Chapter {
-  title: string;
-  audioSrc: string;
-  image?: string;
-  publishDate?: string;
-}
+import type { Chapter } from '@/types/player';
 
 interface ChapterListProps {
   chapters: Chapter[];

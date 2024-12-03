@@ -1,15 +1,9 @@
 import { useState, useEffect } from 'react';
 import AudioPlayer from '@/components/AudioPlayer';
-import ChapterList, { Chapter } from '@/components/ChapterList';
-import type { PlayerCSSProperties } from '@/types/styles';
+import ChapterList from '@/components/ChapterList';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-
-interface PlayerPreviewProps {
-  chapters?: Chapter[];
-  showFirstPost: boolean;
-  listHeight: string;
-  style?: PlayerCSSProperties;
-}
+import type { Chapter, PlayerPreviewProps } from '@/types/player';
+import type { PlayerCSSProperties } from '@/types/styles';
 
 export const PlayerPreview = ({ 
   chapters = [], 
