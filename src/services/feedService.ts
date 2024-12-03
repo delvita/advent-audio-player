@@ -55,18 +55,25 @@ async function fetchAndParseRSS(url: string): Promise<CustomFeed> {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(text, "text/xml");
   
-  const items = Array.from(xmlDoc.querySelectorAll('item')).map(item => {
-    const enclosureUrl = item.querySelector('enclosure')?.getAttribute('url');
-    const mediaContent = item.querySelector('media\\:content, content')?.getAttribute('url');
-    
-    return {
-      title: item.querySelector('title')?.textContent || 'Untitled',
-      enclosure: enclosureUrl ? { url: enclosureUrl } : undefined,
-      content: item.querySelector('content\\:encoded, description')?.textContent || '',
-      pubDate: item.querySelector('pubDate')?.textContent,
-      'media:content': mediaContent ? { $: { url: mediaContent } } : undefined
-    };
-  });
+  // Check for parsing errors
+  const parseError = xmlDoc.querySelector('parsererror');
+  if (parseError) {
+    throw new Error(`XML parsing error: ${parseError.textContent}`);
+  }
+  
+  const items = Array.from(xmlDoc.querySelectorAll('item')).map(item => ({
+    title: item.querySelector('title')?.textContent || 'Untitled',
+    enclosure: (() => {
+      const enclosure = item.querySelector('enclosure');
+      return enclosure?.getAttribute('url') ? { url: enclosure.getAttribute('url')! } : undefined;
+    })(),
+    content: item.querySelector('content\\:encoded, description')?.textContent || '',
+    pubDate: item.querySelector('pubDate')?.textContent || undefined,
+    'media:content': (() => {
+      const media = item.querySelector('media\\:content, content');
+      return media?.getAttribute('url') ? { $: { url: media.getAttribute('url')! } } : undefined;
+    })()
+  }));
 
   return { items };
 }
@@ -81,10 +88,14 @@ export const getFeedItems = async ({
   
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const feed = await fetchAndParseRSS(feedUrl);
+      const proxyUrl = `https://mf1.ch/crosproxy/?${feedUrl}`;
+      console.log(`Attempt ${attempt + 1}: Fetching feed from ${proxyUrl}`);
+      
+      const feed = await fetchAndParseRSS(proxyUrl);
       
       if (!feed?.items?.length) {
-        throw new Error('No items found in feed');
+        console.warn('No items found in feed');
+        return [];
       }
 
       return feed.items.map(item => ({
@@ -97,11 +108,14 @@ export const getFeedItems = async ({
       console.error(`Attempt ${attempt + 1} failed:`, error);
       lastError = error instanceof Error ? error : new Error('Unknown error occurred');
       if (attempt < MAX_RETRIES - 1) {
-        await delay(RETRY_DELAY * Math.pow(2, attempt)); // Exponential backoff
+        const backoffDelay = RETRY_DELAY * Math.pow(2, attempt);
+        console.log(`Retrying in ${backoffDelay}ms...`);
+        await delay(backoffDelay);
         continue;
       }
     }
   }
 
+  console.error('All retry attempts failed');
   throw lastError || new Error('Failed to fetch feed after multiple attempts');
 };
