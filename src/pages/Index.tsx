@@ -3,25 +3,49 @@ import { useQuery } from '@tanstack/react-query';
 import AudioPlayer from '@/components/AudioPlayer';
 import ChapterList, { Chapter } from '@/components/ChapterList';
 import { getFeedItems } from '@/services/feedService';
+import { useToast } from '@/components/ui/use-toast';
 
 const Index = () => {
   const [activeChapter, setActiveChapter] = useState<Chapter>();
+  const { toast } = useToast();
 
-  const { data: chapters = [], isLoading } = useQuery({
+  const { data: chapters = [], isLoading, error } = useQuery({
     queryKey: ['feed-items', 'https://wirfamilien.ch/tag/advent/feed'],
-    queryFn: getFeedItems
+    queryFn: getFeedItems,
+    onError: (err) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to load audio chapters',
+        variant: 'destructive',
+      });
+      console.error('Feed loading error:', err);
+    }
   });
 
   useEffect(() => {
     if (chapters.length > 0 && !activeChapter) {
+      console.log('Setting initial chapter:', chapters[0]);
       setActiveChapter(chapters[0]);
     }
-  }, [chapters]);
+  }, [chapters, activeChapter]);
+
+  const handleChapterSelect = (chapter: Chapter) => {
+    console.log('Selected chapter:', chapter);
+    setActiveChapter(chapter);
+  };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <p className="text-red-500">Failed to load audio chapters</p>
       </div>
     );
   }
@@ -39,7 +63,7 @@ const Index = () => {
         )}
         <ChapterList
           chapters={chapters}
-          onChapterSelect={setActiveChapter}
+          onChapterSelect={handleChapterSelect}
           activeChapter={activeChapter}
         />
       </div>
