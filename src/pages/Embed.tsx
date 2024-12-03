@@ -12,11 +12,13 @@ const Embed = () => {
   const [activeChapter, setActiveChapter] = useState<any>();
   const [settings, setSettings] = useState<PlayerSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
     const loadSettings = async () => {
       if (embedId) {
         setIsLoading(true);
+        setError(null);
         try {
           const loadedSettings = await getSettingsById(embedId);
           if (loadedSettings) {
@@ -24,11 +26,14 @@ const Embed = () => {
             setSettings(loadedSettings);
           } else {
             console.log('No settings found for ID:', embedId);
+            setError('Keine Einstellungen gefunden');
           }
         } catch (error) {
           console.error('Error loading settings:', error);
+          setError('Fehler beim Laden der Einstellungen');
+        } finally {
+          setIsLoading(false);
         }
-        setIsLoading(false);
       }
     };
     
@@ -48,13 +53,12 @@ const Embed = () => {
     }
   }, [chapters, settings?.showFirstPost]);
 
-  const sortedChapters = [...chapters];
-  if (settings?.sortAscending) {
-    sortedChapters.reverse();
-  }
-
   if (isLoading) {
     return <div className="p-4">Lädt...</div>;
+  }
+
+  if (error) {
+    return <div className="p-4 text-red-500">{error}</div>;
   }
 
   if (!settings) {
@@ -78,7 +82,7 @@ const Embed = () => {
       )}
       <div className="mt-2.5">
         <ChapterList
-          chapters={sortedChapters}
+          chapters={chapters}
           onChapterSelect={setActiveChapter}
           activeChapter={activeChapter}
           maxHeight={parseInt(settings.listHeight)}

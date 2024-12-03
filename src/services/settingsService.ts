@@ -22,6 +22,7 @@ export const saveSettings = (settings: PlayerSettings): void => {
     console.log('Settings saved successfully:', settings);
   } catch (error) {
     console.error('Error saving settings:', error);
+    throw error;
   }
 };
 
@@ -48,7 +49,7 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
     return null;
   } catch (error) {
     console.error('Error getting settings by ID:', error);
-    return null;
+    throw error;
   }
 };
 
@@ -60,5 +61,6 @@ export const deleteSettings = (id: string): void => {
     console.log('Settings deleted successfully:', id);
   } catch (error) {
     console.error('Error deleting settings:', error);
+    throw error;
   }
 };
