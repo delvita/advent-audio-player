@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import type { PlayerSettings } from '@/types/playerSettings';
 
 // In-memory storage for development purposes
 const settingsStorage = new Map<string, PlayerSettings>();
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -17,12 +17,11 @@ export async function GET(
     
     if (!settings) {
       console.log('API: No settings found for ID:', id);
-      return new NextResponse(
-        JSON.stringify({ error: 'Settings not found' }),
+      return NextResponse.json(
+        { error: 'Settings not found' },
         {
           status: 404,
           headers: {
-            'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -31,10 +30,8 @@ export async function GET(
       );
     }
     
-    return new NextResponse(JSON.stringify(settings), {
-      status: 200,
+    return NextResponse.json(settings, {
       headers: {
-        'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -42,12 +39,11 @@ export async function GET(
     });
   } catch (error) {
     console.error('API: Error in GET handler:', error);
-    return new NextResponse(
-      JSON.stringify({ error: 'Internal server error' }),
+    return NextResponse.json(
+      { error: 'Internal server error' },
       {
         status: 500,
         headers: {
-          'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -57,19 +53,21 @@ export async function GET(
   }
 }
 
-export async function OPTIONS(request: Request) {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  });
+export async function OPTIONS(request: NextRequest) {
+  return NextResponse.json(
+    {},
+    {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    }
+  );
 }
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -78,12 +76,10 @@ export async function POST(
     
     settingsStorage.set(id, data);
     
-    return new NextResponse(
-      JSON.stringify({ message: 'Settings saved successfully' }),
+    return NextResponse.json(
+      { message: 'Settings saved successfully' },
       {
-        status: 200,
         headers: {
-          'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -92,12 +88,11 @@ export async function POST(
     );
   } catch (error) {
     console.error('API: Error in POST handler:', error);
-    return new NextResponse(
-      JSON.stringify({ error: 'Failed to save settings' }),
+    return NextResponse.json(
+      { error: 'Failed to save settings' },
       {
         status: 500,
         headers: {
-          'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization',
