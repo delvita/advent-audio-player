@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
 import AudioPlayer from '@/components/AudioPlayer';
-import ChapterList, { Chapter } from '@/components/ChapterList';
+import ChapterList from '@/components/ChapterList';
 import { getFeedItems } from '@/services/feedService';
+import type { Chapter } from '@/types/player';
 
 const Index = () => {
   const [activeChapter, setActiveChapter] = useState<Chapter | null>(null);

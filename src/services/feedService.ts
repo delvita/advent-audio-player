@@ -1,4 +1,4 @@
-import type { Chapter } from '@/components/ChapterList';
+import type { Chapter } from '@/types/player';
 import type { FeedItem, FeedError, XMLParseResult } from '@/types/feed';
 
 const TIMEOUT_DURATION = 10000; // 10 seconds
