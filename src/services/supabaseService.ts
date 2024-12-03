@@ -9,6 +9,11 @@ const mapDbToPlayerSettings = (dbSettings: DbPlayerSettings): PlayerSettings => 
     ? JSON.parse(dbSettings.colors) 
     : dbSettings.colors;
 
+  const playerType = dbSettings.player_type as PlayerSettings['playerType'];
+  if (!['big', 'medium', 'small'].includes(playerType)) {
+    throw new Error(`Invalid player type: ${playerType}`);
+  }
+
   return {
     id: dbSettings.id,
     name: dbSettings.name,
@@ -17,11 +22,11 @@ const mapDbToPlayerSettings = (dbSettings: DbPlayerSettings): PlayerSettings => 
     listHeight: dbSettings.list_height,
     sortAscending: dbSettings.sort_ascending,
     showFirstPost: dbSettings.show_first_post,
-    playerType: dbSettings.player_type as PlayerSettings['playerType']
+    playerType
   };
 };
 
-const mapPlayerSettingsToDb = (settings: PlayerSettings) => {
+const mapPlayerSettingsToDb = (settings: PlayerSettings): Database['public']['Tables']['player_settings']['Insert'] => {
   return {
     id: settings.id,
     name: settings.name,
