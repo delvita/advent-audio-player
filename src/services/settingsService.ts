@@ -40,27 +40,41 @@ export const getAllSettings = (): PlayerSettings[] => {
 export const getSettingsById = async (id: string): Promise<PlayerSettings | null> => {
   try {
     // First try to get settings from localStorage
-    const settings = localStorage.getItem(`settings_${id}`);
-    if (settings) {
-      const parsedSettings = JSON.parse(settings);
+    const localSettings = localStorage.getItem(`settings_${id}`);
+    if (localSettings) {
+      const parsedSettings = JSON.parse(localSettings);
       console.log('Settings loaded from localStorage:', parsedSettings);
       return parsedSettings;
     }
     
     // If not in localStorage, try the API endpoint
-    const response = await fetch(`${window.location.origin}/api/settings/${id}`);
-    if (response.ok) {
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
-        const settings = await response.json();
-        console.log('Settings loaded from API:', settings);
-        return settings;
-      }
-      console.log('API response was not JSON:', contentType);
+    console.log('Fetching settings from API for ID:', id);
+    const response = await fetch(`${window.location.origin}/api/settings/${id}`, {
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      console.error('API response not OK:', response.status, response.statusText);
+      return null;
     }
     
-    console.log('No settings found for ID:', id);
-    return null;
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      console.error('Invalid content type:', contentType);
+      return null;
+    }
+    
+    const settings = await response.json();
+    console.log('Settings loaded from API:', settings);
+    
+    if (settings.error) {
+      console.error('API returned error:', settings.error);
+      return null;
+    }
+    
+    return settings;
   } catch (error) {
     console.error('Error getting settings by ID:', error);
     return null;
