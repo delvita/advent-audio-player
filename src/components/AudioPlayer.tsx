@@ -79,18 +79,18 @@ const AudioPlayer = ({ src, title, image }: AudioPlayerProps) => {
   };
 
   return (
-    <Card className="w-full max-w-xl mx-auto">
+    <Card className="w-full max-w-xl mx-auto bg-gradient-to-r from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
       <CardContent className="p-6">
         {image && (
           <div className="mb-4">
-            <img src={image} alt={title} className="w-full h-48 object-cover rounded-lg" />
+            <img src={image} alt={title} className="w-full h-48 object-cover rounded-lg shadow-lg" />
           </div>
         )}
-        <h3 className="text-xl font-semibold mb-4">{title}</h3>
+        <h3 className="text-xl font-semibold mb-4 text-purple-900 dark:text-purple-100">{title}</h3>
         <audio ref={audioRef} src={src} className="hidden" />
         
         <div className="space-y-4">
-          <div className="flex items-center justify-between text-sm text-gray-500">
+          <div className="flex items-center justify-between text-sm text-purple-700 dark:text-purple-200">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
@@ -105,13 +105,27 @@ const AudioPlayer = ({ src, title, image }: AudioPlayerProps) => {
           />
 
           <div className="flex items-center justify-center gap-4">
-            <Button variant="outline" size="icon" onClick={handleSkipBack}>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={handleSkipBack}
+              className="hover:bg-purple-100 dark:hover:bg-purple-900"
+            >
               <SkipBack className="h-4 w-4" />
             </Button>
-            <Button size="icon" onClick={togglePlay}>
+            <Button 
+              size="icon" 
+              onClick={togglePlay}
+              className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600"
+            >
               {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </Button>
-            <Button variant="outline" size="icon" onClick={handleSkipForward}>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={handleSkipForward}
+              className="hover:bg-purple-100 dark:hover:bg-purple-900"
+            >
               <SkipForward className="h-4 w-4" />
             </Button>
           </div>
