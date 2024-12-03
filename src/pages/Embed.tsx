@@ -17,13 +17,16 @@ const Embed = () => {
       const loadedSettings = getSettingsById(embedId);
       if (loadedSettings) {
         setSettings(loadedSettings);
+        console.log('Settings loaded:', loadedSettings); // Debug log
+      } else {
+        console.log('No settings found for ID:', embedId); // Debug log
       }
     }
   }, [embedId]);
 
   const { data: chapters = [], isLoading } = useQuery({
     queryKey: ['feed-items', settings?.feedUrl],
-    queryFn: () => settings?.feedUrl ? getFeedItems({ queryKey: ['feed-items', settings.feedUrl] }) : Promise.resolve([]),
+    queryFn: () => getFeedItems({ queryKey: ['feed-items', settings?.feedUrl || ''] }),
     enabled: !!settings?.feedUrl
   });
 
@@ -39,7 +42,13 @@ const Embed = () => {
     sortedChapters.reverse();
   }
 
-  if (isLoading || !settings) return <div>Loading...</div>;
+  if (!settings) {
+    return <div className="p-4">Keine Einstellungen gefunden</div>;
+  }
+
+  if (isLoading) {
+    return <div className="p-4">Lädt...</div>;
+  }
 
   return (
     <div style={{
