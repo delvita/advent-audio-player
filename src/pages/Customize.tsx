@@ -7,7 +7,6 @@ import ChapterList from '@/components/ChapterList';
 import { useQuery } from '@tanstack/react-query';
 import { getFeedItems } from '@/services/feedService';
 import { useState, useEffect } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -15,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { PlayerSettings as PlayerSettingsType } from '@/types/playerSettings';
 import { generateEmbedId, saveSettings, getAllSettings, getSettingsById, deleteSettings } from '@/services/settingsService';
 import { Trash2 } from "lucide-react";
+import { TemplatesList } from "@/components/TemplatesList";
 
 const Customize = () => {
   const { toast } = useToast();
@@ -83,20 +83,20 @@ const Customize = () => {
     }
   };
 
-  const handleDeleteSettings = () => {
-    if (settings.id) {
-      deleteSettings(settings.id);
-      setSavedSettings(getAllSettings());
+  const handleDeleteSettings = (id: string) => {
+    deleteSettings(id);
+    setSavedSettings(getAllSettings());
+    if (id === settings.id) {
       setSettings({
         ...settings,
         id: generateEmbedId(),
         name: ''
       });
-      toast({
-        title: "Erfolg",
-        description: "Einstellungen wurden erfolgreich gelöscht"
-      });
     }
+    toast({
+      title: "Erfolg",
+      description: "Einstellungen wurden erfolgreich gelöscht"
+    });
   };
 
   return (
@@ -106,31 +106,14 @@ const Customize = () => {
           <CardContent className="p-6">
             <div className="space-y-6">
               <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="flex-1">
-                    <Label htmlFor="settingsName">Name der Einstellungen</Label>
-                    <Input
-                      id="settingsName"
-                      value={settings.name}
-                      onChange={(e) => setSettings({ ...settings, name: e.target.value })}
-                      placeholder="Mein Custom Player"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <Label>Gespeicherte Einstellungen</Label>
-                    <Select onValueChange={handleLoadSettings} value={settings.id}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Gespeicherte Einstellungen auswählen" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {savedSettings.map((s) => (
-                          <SelectItem key={s.id} value={s.id}>
-                            {s.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <Label htmlFor="settingsName">Name der Einstellungen</Label>
+                  <Input
+                    id="settingsName"
+                    value={settings.name}
+                    onChange={(e) => setSettings({ ...settings, name: e.target.value })}
+                    placeholder="Mein Custom Player"
+                  />
                 </div>
 
                 <div>
@@ -158,20 +141,20 @@ const Customize = () => {
                   onPlayerTypeChange={(type) => setSettings({ ...settings, playerType: type })}
                 />
 
-                <div className="flex gap-4">
-                  <Button onClick={handleSaveSettings} className="flex-1">
-                    Einstellungen speichern
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    onClick={handleDeleteSettings}
-                    className="w-auto"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+                <Button onClick={handleSaveSettings} className="w-full">
+                  Einstellungen speichern
+                </Button>
 
                 <EmbedCodes embedId={settings.id} />
+
+                <div className="pt-6 border-t">
+                  <h3 className="text-lg font-semibold mb-4">Templates</h3>
+                  <TemplatesList
+                    templates={savedSettings}
+                    onEdit={handleLoadSettings}
+                    onDelete={handleDeleteSettings}
+                  />
+                </div>
               </div>
             </div>
           </CardContent>
