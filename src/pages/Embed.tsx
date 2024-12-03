@@ -49,11 +49,11 @@ const Embed = () => {
   const sortedChapters = settings?.sortAscending ? [...chapters].reverse() : chapters;
 
   useEffect(() => {
-    if (!activeChapter && sortedChapters.length > 0 && settings) {
+    if (sortedChapters.length > 0 && settings && !activeChapter) {
       const initialChapter = settings.showFirstPost ? sortedChapters[sortedChapters.length - 1] : sortedChapters[0];
       setActiveChapter(initialChapter);
     }
-  }, [sortedChapters.length, settings]);
+  }, [sortedChapters, settings, activeChapter]);
 
   if (isLoading) {
     return <div className="p-4">Lädt...</div>;
