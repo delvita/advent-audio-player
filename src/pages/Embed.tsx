@@ -17,12 +17,16 @@ const Embed = () => {
     const loadSettings = async () => {
       if (embedId) {
         setIsLoading(true);
-        const loadedSettings = await getSettingsById(embedId);
-        if (loadedSettings) {
-          console.log('Settings loaded successfully:', loadedSettings);
-          setSettings(loadedSettings);
-        } else {
-          console.log('No settings found for ID:', embedId);
+        try {
+          const loadedSettings = await getSettingsById(embedId);
+          if (loadedSettings) {
+            console.log('Settings loaded successfully:', loadedSettings);
+            setSettings(loadedSettings);
+          } else {
+            console.log('No settings found for ID:', embedId);
+          }
+        } catch (error) {
+          console.error('Error loading settings:', error);
         }
         setIsLoading(false);
       }
