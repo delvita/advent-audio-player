@@ -25,13 +25,13 @@ export const PlayerPreview = ({
     }
 
     const initialChapter = showFirstPost ? chapterList[chapterList.length - 1] : chapterList[0];
-    if (initialChapter && initialChapter.audioSrc) {
+    if (initialChapter?.audioSrc) {
       setActiveChapter(initialChapter);
     }
   }, [chapters, showFirstPost]);
 
   const handleChapterSelect = (chapter: Chapter) => {
-    if (chapter && chapter.audioSrc) {
+    if (chapter?.audioSrc) {
       setActiveChapter(chapter);
       setShouldAutoPlay(true);
     }
@@ -45,7 +45,7 @@ export const PlayerPreview = ({
 
   return (
     <div className="w-full h-full">
-      {activeChapter && activeChapter.audioSrc && (
+      {activeChapter?.audioSrc && (
         <AudioPlayer
           src={activeChapter.audioSrc}
           title={activeChapter.title}
