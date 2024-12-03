@@ -2,19 +2,19 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from "@/components/ui/use-toast";
 import AudioPlayer from '@/components/AudioPlayer';
-import ChapterList from '@/components/ChapterList';
+import ChapterList, { Chapter } from '@/components/ChapterList';
 import { getFeedItems } from '@/services/feedService';
-import type { Chapter } from '@/components/ChapterList';
 
 const Index = () => {
-  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>();
+  const [activeChapter, setActiveChapter] = useState<Chapter | null>(null);
   const { toast } = useToast();
+  const feedUrl = 'https://mf1.ch/crosproxy/?https://wirfamilien.ch/tag/advent/feed';
 
   const { data: chapters = [], isLoading, error } = useQuery({
-    queryKey: ['feed-items', 'https://mf1.ch/crosproxy/?https://wirfamilien.ch/tag/advent/feed'],
-    queryFn: () => getFeedItems({ 
-      queryKey: ['feed-items', 'https://mf1.ch/crosproxy/?https://wirfamilien.ch/tag/advent/feed'] 
-    }),
+    queryKey: ['feed-items', feedUrl],
+    queryFn: getFeedItems,
+    retry: 3,
+    staleTime: 5 * 60 * 1000, // 5 minutes
     meta: {
       onError: (err: Error) => {
         toast({
@@ -29,13 +29,11 @@ const Index = () => {
 
   useEffect(() => {
     if (chapters.length > 0 && !activeChapter) {
-      console.log('Setting initial chapter:', chapters[0]);
       setActiveChapter(chapters[0]);
     }
   }, [chapters, activeChapter]);
 
   const handleChapterSelect = (chapter: Chapter) => {
-    console.log('Selected chapter:', chapter);
     setActiveChapter(chapter);
   };
 
