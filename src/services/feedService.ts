@@ -18,6 +18,9 @@ export const getFeedItems = async (): Promise<Chapter[]> => {
       const enclosure = item.querySelector('enclosure');
       const audioSrc = enclosure?.getAttribute('url') || '';
       
+      // Get publication date
+      const publishDate = item.querySelector('pubDate')?.textContent || '';
+      
       // Get image from content or media:content
       let image = '';
       const content = item.querySelector('content\\:encoded')?.textContent || 
@@ -38,7 +41,8 @@ export const getFeedItems = async (): Promise<Chapter[]> => {
       return {
         title,
         audioSrc,
-        image
+        image,
+        publishDate
       };
     }).filter(item => item.audioSrc);
   } catch (error) {
