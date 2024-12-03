@@ -5,19 +5,16 @@ import { useState } from 'react';
 
 interface PlayerPreviewProps {
   chapters: Chapter[];
-  initialChapter?: Chapter;
   showFirstPost: boolean;
   listHeight: string;
 }
 
-export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHeight }: PlayerPreviewProps) => {
-  const defaultChapter = showFirstPost && chapters.length > 0 
+export const PlayerPreview = ({ chapters, showFirstPost, listHeight }: PlayerPreviewProps) => {
+  const initialChapter = showFirstPost && chapters.length > 0 
     ? chapters[chapters.length - 1] 
     : chapters[0];
 
-  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(
-    initialChapter || defaultChapter
-  );
+  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(initialChapter);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
   const handleChapterSelect = (chapter: Chapter) => {
@@ -25,8 +22,12 @@ export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHei
     setShouldAutoPlay(true);
   };
 
+  if (!chapters.length) {
+    return <div className="p-4">No chapters available</div>;
+  }
+
   return (
-    <div>
+    <div className="w-full h-full">
       {activeChapter && (
         <AudioPlayer
           src={activeChapter.audioSrc}
