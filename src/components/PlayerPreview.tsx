@@ -15,16 +15,13 @@ export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHei
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
   useEffect(() => {
-    if (initialChapter) {
-      setActiveChapter(initialChapter);
-      return;
-    }
+    if (chapters.length === 0) return;
     
-    if (chapters.length > 0) {
+    if (!activeChapter) {
       const defaultChapter = showFirstPost ? chapters[chapters.length - 1] : chapters[0];
       setActiveChapter(defaultChapter);
     }
-  }, [chapters, showFirstPost, initialChapter]);
+  }, [chapters, showFirstPost, activeChapter]);
 
   const handleChapterSelect = (chapter: Chapter) => {
     setActiveChapter(chapter);
