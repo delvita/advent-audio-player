@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, SkipForward, SkipBack } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { useToast } from "@/hooks/use-toast";
 
 interface AudioPlayerProps {
   src: string;
@@ -16,6 +17,7 @@ const AudioPlayer = ({ src, title, image, autoPlay = false }: AudioPlayerProps) 
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = React.useRef<HTMLAudioElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (audioRef.current) {
@@ -23,7 +25,11 @@ const AudioPlayer = ({ src, title, image, autoPlay = false }: AudioPlayerProps) 
       audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
       
       if (autoPlay) {
-        audioRef.current.play().then(() => setIsPlaying(true));
+        audioRef.current.play().catch(error => {
+          console.log('Autoplay prevented:', error);
+          // Don't show error toast as this is expected behavior
+          setIsPlaying(false);
+        });
       }
       
       return () => {
@@ -51,10 +57,22 @@ const AudioPlayer = ({ src, title, image, autoPlay = false }: AudioPlayerProps) 
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
+        setIsPlaying(false);
       } else {
-        audioRef.current.play();
+        audioRef.current.play()
+          .then(() => {
+            setIsPlaying(true);
+          })
+          .catch(error => {
+            console.error('Playback failed:', error);
+            toast({
+              title: "Wiedergabe fehlgeschlagen",
+              description: "Bitte versuchen Sie es erneut.",
+              variant: "destructive",
+            });
+            setIsPlaying(false);
+          });
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
