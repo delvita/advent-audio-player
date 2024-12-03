@@ -12,13 +12,15 @@ const Index = () => {
   const { data: chapters = [], isLoading, error } = useQuery({
     queryKey: ['feed-items', 'https://wirfamilien.ch/tag/advent/feed'],
     queryFn: getFeedItems,
-    onError: (err) => {
-      toast({
-        title: 'Error',
-        description: 'Failed to load audio chapters',
-        variant: 'destructive',
-      });
-      console.error('Feed loading error:', err);
+    meta: {
+      onError: (err: Error) => {
+        toast({
+          title: 'Error',
+          description: 'Failed to load audio chapters',
+          variant: 'destructive',
+        });
+        console.error('Feed loading error:', err);
+      }
     }
   });
 

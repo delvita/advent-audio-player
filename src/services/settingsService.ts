@@ -1,7 +1,5 @@
 import { PlayerSettings } from '@/types/playerSettings';
 
-const SETTINGS_KEY = 'player_settings';
-
 export const generateEmbedId = (): string => {
   return Math.random().toString(36).substring(2, 15);
 };
@@ -9,7 +7,6 @@ export const generateEmbedId = (): string => {
 export const saveSettings = async (settings: PlayerSettings): Promise<void> => {
   try {
     localStorage.setItem(`settings_${settings.id}`, JSON.stringify(settings));
-    console.log('Settings saved successfully:', settings);
   } catch (error) {
     console.error('Error saving settings:', error);
     throw error;
@@ -20,7 +17,6 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
   try {
     const settings = localStorage.getItem(`settings_${id}`);
     if (!settings) {
-      console.log('No settings found for ID:', id);
       return null;
     }
     return JSON.parse(settings);
@@ -28,4 +24,22 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
     console.error('Error getting settings:', error);
     throw error;
   }
+};
+
+export const getAllSettings = (): PlayerSettings[] => {
+  const settings: PlayerSettings[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key?.startsWith('settings_')) {
+      const setting = localStorage.getItem(key);
+      if (setting) {
+        settings.push(JSON.parse(setting));
+      }
+    }
+  }
+  return settings;
+};
+
+export const deleteSettings = (id: string): void => {
+  localStorage.removeItem(`settings_${id}`);
 };
