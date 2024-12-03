@@ -13,8 +13,8 @@ const Embed = () => {
   const [settings, setSettings] = useState<PlayerSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [feedUrl, setFeedUrl] = useState<string | null>(null);
 
+  // Load settings first
   useEffect(() => {
     const loadSettings = async () => {
       if (embedId) {
@@ -24,7 +24,6 @@ const Embed = () => {
           const loadedSettings = await getSettingsById(embedId);
           if (loadedSettings) {
             setSettings(loadedSettings);
-            setFeedUrl(loadedSettings.feedUrl);
           } else {
             setError('Keine Einstellungen gefunden');
           }
@@ -39,10 +38,11 @@ const Embed = () => {
     loadSettings();
   }, [embedId]);
 
+  // Fetch chapters using the settings
   const { data: chapters = [] } = useQuery({
-    queryKey: ['feed-items', feedUrl],
-    queryFn: () => getFeedItems({ queryKey: ['feed-items', feedUrl || ''] }),
-    enabled: !!feedUrl
+    queryKey: ['feed-items', settings?.feedUrl],
+    queryFn: () => getFeedItems({ queryKey: ['feed-items', settings?.feedUrl || ''] }),
+    enabled: !!settings?.feedUrl
   });
 
   // Sort chapters based on settings
@@ -51,6 +51,7 @@ const Embed = () => {
     sortedChapters.reverse();
   }
 
+  // Set initial chapter
   useEffect(() => {
     if (sortedChapters.length > 0 && settings) {
       const initialChapter = settings.showFirstPost ? sortedChapters[sortedChapters.length - 1] : sortedChapters[0];
