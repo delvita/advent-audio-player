@@ -13,7 +13,7 @@
     <div id="root"></div>
     <script>
       // Only load gptengineer.js if we're not in preview mode
-      if (!window.location.hostname.includes('preview--')) {
+      if (!window.location.href.includes('preview--')) {
         const script = document.createElement('script');
         script.src = 'https://cdn.gpteng.co/gptengineer.js';
         script.type = 'module';
