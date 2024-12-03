@@ -9,12 +9,12 @@ interface PlayerPreviewProps {
   listHeight: string;
 }
 
-export const PlayerPreview = ({ chapters, showFirstPost, listHeight }: PlayerPreviewProps) => {
+export const PlayerPreview = ({ chapters = [], showFirstPost, listHeight }: PlayerPreviewProps) => {
   const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(undefined);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
   useEffect(() => {
-    if (!chapters || chapters.length === 0) {
+    if (!Array.isArray(chapters) || chapters.length === 0) {
       setActiveChapter(undefined);
       return;
     }
@@ -24,11 +24,13 @@ export const PlayerPreview = ({ chapters, showFirstPost, listHeight }: PlayerPre
   }, [chapters, showFirstPost]);
 
   const handleChapterSelect = (chapter: Chapter) => {
-    setActiveChapter(chapter);
-    setShouldAutoPlay(true);
+    if (chapter) {
+      setActiveChapter(chapter);
+      setShouldAutoPlay(true);
+    }
   };
 
-  if (!chapters || chapters.length === 0) {
+  if (!Array.isArray(chapters) || chapters.length === 0) {
     return <div className="p-4">Keine Kapitel verfügbar</div>;
   }
 
