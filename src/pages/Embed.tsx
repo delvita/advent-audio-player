@@ -11,20 +11,27 @@ const Embed = () => {
   const { embedId } = useParams();
   const [activeChapter, setActiveChapter] = useState<any>();
   const [settings, setSettings] = useState<PlayerSettings | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    if (embedId) {
-      const loadedSettings = getSettingsById(embedId);
-      if (loadedSettings) {
-        console.log('Settings loaded:', loadedSettings);
-        setSettings(loadedSettings);
-      } else {
-        console.log('No settings found for ID:', embedId);
+    const loadSettings = async () => {
+      if (embedId) {
+        setIsLoading(true);
+        const loadedSettings = await getSettingsById(embedId);
+        if (loadedSettings) {
+          console.log('Settings loaded successfully:', loadedSettings);
+          setSettings(loadedSettings);
+        } else {
+          console.log('No settings found for ID:', embedId);
+        }
+        setIsLoading(false);
       }
-    }
+    };
+    
+    loadSettings();
   }, [embedId]);
 
-  const { data: chapters = [], isLoading } = useQuery({
+  const { data: chapters = [] } = useQuery({
     queryKey: ['feed-items', settings?.feedUrl],
     queryFn: () => getFeedItems({ queryKey: ['feed-items', settings?.feedUrl || ''] }),
     enabled: !!settings?.feedUrl
@@ -42,12 +49,12 @@ const Embed = () => {
     sortedChapters.reverse();
   }
 
-  if (!settings) {
-    return <div className="p-4">Keine Einstellungen gefunden</div>;
-  }
-
   if (isLoading) {
     return <div className="p-4">Lädt...</div>;
+  }
+
+  if (!settings) {
+    return <div className="p-4">Keine Einstellungen gefunden</div>;
   }
 
   return (

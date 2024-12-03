@@ -6,18 +6,6 @@ export const generateEmbedId = (): string => {
   return Math.random().toString(36).substring(2, 15);
 };
 
-export const encodeSettings = (settings: PlayerSettings): string => {
-  return btoa(JSON.stringify(settings));
-};
-
-export const decodeSettings = (encoded: string): PlayerSettings | null => {
-  try {
-    return JSON.parse(atob(encoded));
-  } catch {
-    return null;
-  }
-};
-
 export const saveSettings = (settings: PlayerSettings): void => {
   const existingSettings = getAllSettings();
   const settingsIndex = existingSettings.findIndex(s => s.id === settings.id);
@@ -30,12 +18,9 @@ export const saveSettings = (settings: PlayerSettings): void => {
   
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(existingSettings));
-    // Encode settings in URL-safe format
-    const encodedSettings = encodeSettings(settings);
-    localStorage.setItem(`encoded_${settings.id}`, encodedSettings);
+    // Also save individual settings by ID for cross-domain access
+    localStorage.setItem(`settings_${settings.id}`, JSON.stringify(settings));
     console.log('Settings saved successfully:', settings);
-    console.log('All settings after save:', existingSettings);
-    console.log('Encoded settings:', encodedSettings);
   } catch (error) {
     console.error('Error saving settings:', error);
   }
@@ -52,38 +37,26 @@ export const getAllSettings = (): PlayerSettings[] => {
   }
 };
 
-export const getSettingsById = (id: string): PlayerSettings | null => {
+export const getSettingsById = async (id: string): Promise<PlayerSettings | null> => {
   try {
-    // First try to get from URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const encodedSettings = urlParams.get('settings');
-    
-    if (encodedSettings) {
-      const settings = decodeSettings(encodedSettings);
-      if (settings) {
-        console.log('Settings loaded from URL:', settings);
-        return settings;
-      }
+    // First try to get settings from the API endpoint
+    const response = await fetch(`${window.location.origin}/api/settings/${id}`);
+    if (response.ok) {
+      const settings = await response.json();
+      console.log('Settings loaded from API:', settings);
+      return settings;
     }
     
-    // Then try localStorage
-    const settings = getAllSettings();
-    console.log('Looking for settings with ID:', id);
-    console.log('Available settings:', settings);
-    const foundSettings = settings.find(s => s.id === id);
-    console.log('Found settings:', foundSettings);
-    
-    // If not found in localStorage, try encoded storage
-    if (!foundSettings) {
-      const encodedFromStorage = localStorage.getItem(`encoded_${id}`);
-      if (encodedFromStorage) {
-        const decodedSettings = decodeSettings(encodedFromStorage);
-        console.log('Settings loaded from encoded storage:', decodedSettings);
-        return decodedSettings;
-      }
+    // Fallback to localStorage
+    const settings = localStorage.getItem(`settings_${id}`);
+    if (settings) {
+      const parsedSettings = JSON.parse(settings);
+      console.log('Settings loaded from localStorage:', parsedSettings);
+      return parsedSettings;
     }
     
-    return foundSettings || null;
+    console.log('No settings found for ID:', id);
+    return null;
   } catch (error) {
     console.error('Error getting settings by ID:', error);
     return null;
@@ -93,5 +66,5 @@ export const getSettingsById = (id: string): PlayerSettings | null => {
 export const deleteSettings = (id: string): void => {
   const settings = getAllSettings().filter(s => s.id !== id);
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-  localStorage.removeItem(`encoded_${id}`);
+  localStorage.removeItem(`settings_${id}`);
 };
