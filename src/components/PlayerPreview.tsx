@@ -10,7 +10,9 @@ interface PlayerPreviewProps {
 }
 
 export const PlayerPreview = ({ chapters, showFirstPost, listHeight }: PlayerPreviewProps) => {
-  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(undefined);
+  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(
+    showFirstPost && chapters.length > 0 ? chapters[chapters.length - 1] : chapters[0]
+  );
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
   useEffect(() => {
