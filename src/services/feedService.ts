@@ -20,7 +20,6 @@ const fetchWithTimeout = async (url: string): Promise<Response> => {
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_DURATION);
 
   try {
-    console.log(`Fetching feed from URL: ${url}`);
     const response = await fetch(url, { signal: controller.signal });
     clearTimeout(timeoutId);
     
@@ -31,7 +30,6 @@ const fetchWithTimeout = async (url: string): Promise<Response> => {
       );
     }
     
-    console.log('Feed fetched successfully');
     return response;
   } catch (error) {
     clearTimeout(timeoutId);
@@ -45,7 +43,6 @@ const fetchWithTimeout = async (url: string): Promise<Response> => {
 
 const parseXMLSafely = (text: string): XMLParseResult => {
   try {
-    console.log('Attempting to parse XML');
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(text, 'text/xml');
     
@@ -57,7 +54,6 @@ const parseXMLSafely = (text: string): XMLParseResult => {
       };
     }
 
-    console.log('XML parsed successfully');
     return {
       success: true,
       document: xmlDoc
@@ -83,7 +79,6 @@ const parseFeedItem = (item: Element): FeedItem => {
                    extractImageUrl(item.querySelector('content\\:encoded, description')?.textContent || ''));
   const publishDate = item.querySelector('pubDate')?.textContent;
 
-  console.log(`Parsed feed item: ${title}`);
   return { title, audioUrl, imageUrl, publishDate };
 };
 
@@ -93,8 +88,6 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
   
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      console.log(`Attempt ${attempt + 1}: Fetching feed from ${feedUrl}`);
-      
       const proxyUrl = `https://mf1.ch/crosproxy/?${feedUrl}`;
       const response = await fetchWithTimeout(proxyUrl);
       const text = await response.text();
@@ -111,8 +104,6 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
         .map(parseFeedItem)
         .filter(item => item.audioUrl);
 
-      console.log(`Successfully processed ${items.length} feed items`);
-
       return items.map(item => ({
         title: item.title,
         audioSrc: item.audioUrl,
@@ -120,14 +111,12 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
         publishDate: item.publishDate
       }));
     } catch (error) {
-      console.error(`Attempt ${attempt + 1} failed:`, error);
       lastError = error instanceof Error ? 
         createFeedError(error.message, 'UNKNOWN', error) :
         createFeedError('Unknown error occurred', 'UNKNOWN', error);
       
       if (attempt < MAX_RETRIES - 1) {
         const backoffDelay = RETRY_DELAY * Math.pow(2, attempt);
-        console.log(`Retrying in ${backoffDelay}ms...`);
         await delay(backoffDelay);
         continue;
       }
