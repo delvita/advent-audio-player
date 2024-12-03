@@ -17,10 +17,20 @@ interface ChapterListProps {
 }
 
 const ChapterList = ({ chapters, onChapterSelect, activeChapter, maxHeight = 600 }: ChapterListProps) => {
-  const heightStyle = maxHeight ? `h-[${maxHeight}px]` : 'h-[600px]';
+  // Tailwind erfordert vollständige Klassen zur Build-Zeit
+  const getHeightClass = (height: number) => {
+    switch(height) {
+      case 300: return 'h-[300px]';
+      case 400: return 'h-[400px]';
+      case 500: return 'h-[500px]';
+      case 600: return 'h-[600px]';
+      case 700: return 'h-[700px]';
+      default: return 'h-[600px]';
+    }
+  };
   
   return (
-    <ScrollArea className={`w-full ${heightStyle} rounded-md border`}>
+    <ScrollArea className={`w-full ${getHeightClass(maxHeight)} rounded-md border`}>
       <div className="space-y-0">
         {chapters.map((chapter, index) => (
           <div 
