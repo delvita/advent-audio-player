@@ -1,4 +1,3 @@
-import Parser from 'rss-parser';
 import type { Chapter } from '@/components/ChapterList';
 
 interface CustomFeed {
@@ -31,32 +30,6 @@ interface CustomItem {
   };
 }
 
-const parser: Parser<CustomFeed, CustomItem> = new Parser({
-  customFields: {
-    item: [['media:content', 'media:content']],
-  },
-  requestOptions: {
-    // Use fetch API instead of Node's http module
-    fetcher: async (url: string) => {
-      try {
-        const response = await fetch(url, {
-          headers: {
-            'Accept': 'application/rss+xml, application/xml, text/xml; q=0.1',
-          }
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const text = await response.text();
-        return text;
-      } catch (error) {
-        console.error('Feed fetch error:', error);
-        throw error;
-      }
-    }
-  }
-});
-
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
 
@@ -66,6 +39,37 @@ const extractImageUrl = (content: string): string | undefined => {
   const imgMatch = content?.match(/<img[^>]+src="([^">]+)"/);
   return imgMatch?.[1];
 };
+
+async function fetchAndParseRSS(url: string): Promise<CustomFeed> {
+  const response = await fetch(url, {
+    headers: {
+      'Accept': 'application/rss+xml, application/xml, text/xml; q=0.1',
+    }
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  const text = await response.text();
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(text, "text/xml");
+  
+  const items = Array.from(xmlDoc.querySelectorAll('item')).map(item => {
+    const enclosureUrl = item.querySelector('enclosure')?.getAttribute('url');
+    const mediaContent = item.querySelector('media\\:content, content')?.getAttribute('url');
+    
+    return {
+      title: item.querySelector('title')?.textContent || 'Untitled',
+      enclosure: enclosureUrl ? { url: enclosureUrl } : undefined,
+      content: item.querySelector('content\\:encoded, description')?.textContent || '',
+      pubDate: item.querySelector('pubDate')?.textContent,
+      'media:content': mediaContent ? { $: { url: mediaContent } } : undefined
+    };
+  });
+
+  return { items };
+}
 
 export const getFeedItems = async ({ 
   queryKey 
@@ -77,7 +81,7 @@ export const getFeedItems = async ({
   
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const feed = await parser.parseURL(feedUrl);
+      const feed = await fetchAndParseRSS(feedUrl);
       
       if (!feed?.items?.length) {
         throw new Error('No items found in feed');
