@@ -6,13 +6,13 @@ export interface FeedItem {
   content?: string;
 }
 
-export interface FeedError extends Error {
+export type FeedError = Error & {
   type: 'NETWORK' | 'PARSE' | 'TIMEOUT' | 'UNKNOWN';
   originalError?: unknown;
-}
+};
 
 export interface XMLParseResult {
   success: boolean;
-  error?: string;
   document?: Document;
+  error?: string;
 }
