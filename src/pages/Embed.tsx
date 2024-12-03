@@ -1,12 +1,11 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import AudioPlayer from '@/components/AudioPlayer';
-import ChapterList from '@/components/ChapterList';
+import ChapterList, { Chapter } from '@/components/ChapterList';
 import { useQuery } from '@tanstack/react-query';
 import { getFeedItems } from '@/services/feedService';
 import { getSettingsById } from '@/services/settingsService';
 import type { PlayerSettings } from '@/types/playerSettings';
-import type { Chapter } from '@/components/ChapterList';
 
 const Embed = () => {
   const { embedId } = useParams();
@@ -23,14 +22,12 @@ const Embed = () => {
         try {
           const loadedSettings = await getSettingsById(embedId);
           if (loadedSettings) {
-            console.log('Settings loaded successfully:', loadedSettings);
             setSettings(loadedSettings);
           } else {
-            console.log('No settings found for ID:', embedId);
             setError('Keine Einstellungen gefunden');
           }
-        } catch (error) {
-          console.error('Error loading settings:', error);
+        } catch (err) {
+          console.error('Error loading settings:', err);
           setError('Fehler beim Laden der Einstellungen');
         } finally {
           setIsLoading(false);
