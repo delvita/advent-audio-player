@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import AudioPlayer from '@/components/AudioPlayer';
 import ChapterList, { Chapter } from '@/components/ChapterList';
@@ -12,9 +12,11 @@ const Index = () => {
     queryFn: getFeedItems
   });
 
-  const handleChapterSelect = (chapter: Chapter) => {
-    setActiveChapter(chapter);
-  };
+  useEffect(() => {
+    if (chapters.length > 0 && !activeChapter) {
+      setActiveChapter(chapters[0]);
+    }
+  }, [chapters]);
 
   if (isLoading) {
     return (
@@ -36,7 +38,7 @@ const Index = () => {
         )}
         <ChapterList
           chapters={chapters}
-          onChapterSelect={handleChapterSelect}
+          onChapterSelect={setActiveChapter}
           activeChapter={activeChapter}
         />
       </div>

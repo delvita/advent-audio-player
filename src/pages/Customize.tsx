@@ -3,29 +3,49 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import AudioPlayer from '@/components/AudioPlayer';
+import ChapterList from '@/components/ChapterList';
+import { useQuery } from '@tanstack/react-query';
+import { getFeedItems } from '@/services/feedService';
 
 const Customize = () => {
   const { toast } = useToast();
   const [customColors, setCustomColors] = useState({
-    background: '#f3e8ff',
-    text: '#1a1a1a',
-    primary: '#9333ea',
-    secondary: '#d8b4fe'
+    background: '#ffffff',
+    text: '#000000',
+    primary: '#9b87f5',
+    secondary: '#7E69AB'
   });
   
-  const [previewAudio] = useState({
-    src: 'https://example.com/sample.mp3',
-    title: 'Preview Audio',
-    image: 'https://example.com/image.jpg'
+  const [listHeight, setListHeight] = useState('600');
+  const [sortAscending, setSortAscending] = useState(false);
+  const [showFirstPost, setShowFirstPost] = useState(false);
+  const [activeChapter, setActiveChapter] = useState<any>();
+
+  const { data: chapters = [] } = useQuery({
+    queryKey: ['feed-items'],
+    queryFn: getFeedItems
   });
+
+  React.useEffect(() => {
+    if (chapters.length > 0) {
+      const initialChapter = showFirstPost ? chapters[chapters.length - 1] : chapters[0];
+      setActiveChapter(initialChapter);
+    }
+  }, [chapters, showFirstPost]);
+
+  const sortedChapters = [...chapters];
+  if (sortAscending) {
+    sortedChapters.reverse();
+  }
 
   const generateEmbedCode = () => {
     const embedCode = `<iframe 
-  src="YOUR_DOMAIN/embed?bg=${encodeURIComponent(customColors.background)}&text=${encodeURIComponent(customColors.text)}&primary=${encodeURIComponent(customColors.primary)}&secondary=${encodeURIComponent(customColors.secondary)}"
+  src="${window.location.origin}/embed?bg=${encodeURIComponent(customColors.background)}&text=${encodeURIComponent(customColors.text)}&primary=${encodeURIComponent(customColors.primary)}&secondary=${encodeURIComponent(customColors.secondary)}&height=${listHeight}&sortAsc=${sortAscending}&showFirst=${showFirstPost}"
   width="100%"
-  height="200"
+  height="${parseInt(listHeight) + 400}px"
   frameborder="0"
 ></iframe>`;
 
@@ -38,12 +58,10 @@ const Customize = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Customize Player</h1>
-      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card>
           <CardContent className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Color Settings</h2>
+            <h2 className="text-xl font-semibold mb-4">Player Settings</h2>
             <div className="space-y-4">
               <div>
                 <Label htmlFor="background">Background Color</Label>
@@ -117,6 +135,34 @@ const Customize = () => {
                 </div>
               </div>
 
+              <div>
+                <Label htmlFor="listHeight">List Height (px)</Label>
+                <Input
+                  id="listHeight"
+                  type="number"
+                  value={listHeight}
+                  onChange={(e) => setListHeight(e.target.value)}
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="sortAscending"
+                  checked={sortAscending}
+                  onCheckedChange={setSortAscending}
+                />
+                <Label htmlFor="sortAscending">Sort Oldest First</Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="showFirstPost"
+                  checked={showFirstPost}
+                  onCheckedChange={setShowFirstPost}
+                />
+                <Label htmlFor="showFirstPost">Show First Post Initially</Label>
+              </div>
+
               <Button onClick={generateEmbedCode} className="w-full">
                 Generate Embed Code
               </Button>
@@ -130,9 +176,21 @@ const Customize = () => {
             '--player-bg': customColors.background,
             '--player-text': customColors.text,
             '--player-primary': customColors.primary,
-            '--player-secondary': customColors.secondary
+            '--player-secondary': customColors.secondary,
           } as React.CSSProperties}>
-            <AudioPlayer {...previewAudio} />
+            {activeChapter && (
+              <AudioPlayer
+                src={activeChapter.audioSrc}
+                title={activeChapter.title}
+                image={activeChapter.image}
+              />
+            )}
+            <ChapterList
+              chapters={sortedChapters}
+              onChapterSelect={setActiveChapter}
+              activeChapter={activeChapter}
+              maxHeight={parseInt(listHeight)}
+            />
           </div>
         </div>
       </div>

@@ -13,16 +13,14 @@ interface ChapterListProps {
   chapters: Chapter[];
   onChapterSelect: (chapter: Chapter) => void;
   activeChapter?: Chapter;
+  maxHeight?: number;
 }
 
-const ChapterList = ({ chapters, onChapterSelect, activeChapter }: ChapterListProps) => {
-  // Sort chapters to show oldest first
-  const sortedChapters = [...chapters].reverse();
-
+const ChapterList = ({ chapters, onChapterSelect, activeChapter, maxHeight = 600 }: ChapterListProps) => {
   return (
-    <ScrollArea className="h-[600px] w-full rounded-md border">
+    <ScrollArea className={`h-[${maxHeight}px] w-full rounded-md border`}>
       <div className="space-y-0">
-        {sortedChapters.map((chapter, index) => (
+        {chapters.map((chapter, index) => (
           <div 
             key={index}
             className={`cursor-pointer transition-colors hover:bg-accent p-4 border-b last:border-b-0 ${
