@@ -1,45 +1,22 @@
 import { PlayerSettings } from '@/types/playerSettings';
+import { saveSettings as saveToSupabase, getSettingsById as getFromSupabase, getAllSettings as getAllFromSupabase, deleteSettings as deleteFromSupabase } from './supabaseService';
 
 export const generateEmbedId = (): string => {
   return Math.random().toString(36).substring(2, 15);
 };
 
 export const saveSettings = async (settings: PlayerSettings): Promise<void> => {
-  try {
-    localStorage.setItem(`settings_${settings.id}`, JSON.stringify(settings));
-  } catch (error) {
-    console.error('Error saving settings:', error);
-    throw error;
-  }
+  await saveToSupabase(settings);
 };
 
 export const getSettingsById = async (id: string): Promise<PlayerSettings | null> => {
-  try {
-    const settings = localStorage.getItem(`settings_${id}`);
-    if (!settings) {
-      return null;
-    }
-    return JSON.parse(settings);
-  } catch (error) {
-    console.error('Error getting settings:', error);
-    throw error;
-  }
+  return await getFromSupabase(id);
 };
 
-export const getAllSettings = (): PlayerSettings[] => {
-  const settings: PlayerSettings[] = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key?.startsWith('settings_')) {
-      const setting = localStorage.getItem(key);
-      if (setting) {
-        settings.push(JSON.parse(setting));
-      }
-    }
-  }
-  return settings;
+export const getAllSettings = async (): Promise<PlayerSettings[]> => {
+  return await getAllFromSupabase();
 };
 
-export const deleteSettings = (id: string): void => {
-  localStorage.removeItem(`settings_${id}`);
+export const deleteSettings = async (id: string): Promise<void> => {
+  await deleteFromSupabase(id);
 };

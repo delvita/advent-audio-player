@@ -3,7 +3,7 @@ import { ColorSettings } from "@/components/ColorSettings";
 import { PlayerSettings } from "@/components/PlayerSettings";
 import { EmbedCodes } from "@/components/EmbedCodes";
 import { PlayerPreview } from '@/components/PlayerPreview';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getFeedItems } from '@/services/feedService';
 import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import { TemplatesList } from "@/components/TemplatesList";
 
 const Customize = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [settings, setSettings] = useState<PlayerSettingsType>({
     id: generateEmbedId(),
     name: '',
@@ -31,22 +32,52 @@ const Customize = () => {
     showFirstPost: false,
     playerType: 'medium'
   });
-  
-  const [savedSettings, setSavedSettings] = useState<PlayerSettingsType[]>([]);
+
+  const { data: savedSettings = [] } = useQuery({
+    queryKey: ['settings'],
+    queryFn: getAllSettings
+  });
 
   const { data: chapters = [] } = useQuery({
     queryKey: ['feed-items', settings.feedUrl],
     queryFn: () => getFeedItems({ queryKey: ['feed-items', settings.feedUrl] })
   });
 
-  useEffect(() => {
-    setSavedSettings(getAllSettings());
-  }, []);
+  const saveMutation = useMutation({
+    mutationFn: saveSettings,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+      toast({
+        title: "Erfolg",
+        description: "Einstellungen wurden erfolgreich gespeichert"
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Fehler beim Speichern der Einstellungen",
+        variant: "destructive"
+      });
+    }
+  });
 
-  const sortedChapters = [...chapters];
-  if (settings.sortAscending) {
-    sortedChapters.reverse();
-  }
+  const deleteMutation = useMutation({
+    mutationFn: deleteSettings,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+      toast({
+        title: "Erfolg",
+        description: "Einstellungen wurden erfolgreich gelöscht"
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Fehler beim Löschen der Einstellungen",
+        variant: "destructive"
+      });
+    }
+  });
 
   const handleSaveSettings = () => {
     if (!settings.name) {
@@ -58,24 +89,26 @@ const Customize = () => {
       return;
     }
     
-    saveSettings(settings);
-    setSavedSettings(getAllSettings());
-    toast({
-      title: "Erfolg",
-      description: "Einstellungen wurden erfolgreich gespeichert"
-    });
+    saveMutation.mutate(settings);
   };
 
   const handleLoadSettings = async (id: string) => {
-    const loadedSettings = await getSettingsById(id);
-    if (loadedSettings) {
-      setSettings(loadedSettings);
+    try {
+      const loadedSettings = await getSettingsById(id);
+      if (loadedSettings) {
+        setSettings(loadedSettings);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Fehler beim Laden der Einstellungen",
+        variant: "destructive"
+      });
     }
   };
 
   const handleDeleteSettings = (id: string) => {
-    deleteSettings(id);
-    setSavedSettings(getAllSettings());
+    deleteMutation.mutate(id);
     if (id === settings.id) {
       setSettings({
         ...settings,
@@ -83,11 +116,12 @@ const Customize = () => {
         name: ''
       });
     }
-    toast({
-      title: "Erfolg",
-      description: "Einstellungen wurden erfolgreich gelöscht"
-    });
   };
+
+  const sortedChapters = [...chapters];
+  if (settings.sortAscending) {
+    sortedChapters.reverse();
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
