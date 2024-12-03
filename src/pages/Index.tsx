@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import AudioPlayer from '@/components/AudioPlayer';
 import ChapterList, { Chapter } from '@/components/ChapterList';
 import { getFeedItems } from '@/services/feedService';
@@ -10,16 +10,21 @@ const Index = () => {
   const { toast } = useToast();
   const feedUrl = 'https://mf1.ch/crosproxy/?https://wirfamilien.ch/tag/advent/feed';
 
-  const { data: chapters = [], isLoading, error } = useQuery({
+  const { 
+    data: chapters = [], 
+    isLoading, 
+    error,
+    isError 
+  } = useQuery({
     queryKey: ['feed-items', feedUrl],
-    queryFn: getFeedItems,
+    queryFn: () => getFeedItems({ queryKey: ['feed-items', feedUrl] }),
     retry: 3,
     staleTime: 5 * 60 * 1000, // 5 minutes
     meta: {
       onError: (err: Error) => {
         toast({
-          title: 'Error',
-          description: 'Failed to load audio chapters',
+          title: 'Fehler',
+          description: 'Fehler beim Laden der Audio-Kapitel',
           variant: 'destructive',
         });
         console.error('Feed loading error:', err);
@@ -34,6 +39,7 @@ const Index = () => {
   }, [chapters, activeChapter]);
 
   const handleChapterSelect = (chapter: Chapter) => {
+    if (!chapter) return;
     setActiveChapter(chapter);
   };
 
@@ -45,10 +51,20 @@ const Index = () => {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
-        <p className="text-red-500">Failed to load audio chapters</p>
+        <p className="text-destructive">
+          Fehler beim Laden der Audio-Kapitel: {error instanceof Error ? error.message : 'Unbekannter Fehler'}
+        </p>
+      </div>
+    );
+  }
+
+  if (!Array.isArray(chapters) || chapters.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <p className="text-muted-foreground">Keine Audio-Kapitel verfügbar</p>
       </div>
     );
   }
