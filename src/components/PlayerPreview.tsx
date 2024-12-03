@@ -13,28 +13,26 @@ export const PlayerPreview = ({
   showFirstPost, 
   listHeight 
 }: PlayerPreviewProps) => {
-  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(undefined);
+  const [activeChapter, setActiveChapter] = useState<Chapter | null>(null);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
   useEffect(() => {
     const chapterList = Array.isArray(chapters) ? chapters : [];
     
     if (chapterList.length === 0) {
-      setActiveChapter(undefined);
+      setActiveChapter(null);
       return;
     }
 
     const initialChapter = showFirstPost ? chapterList[chapterList.length - 1] : chapterList[0];
-    if (initialChapter && 'audioSrc' in initialChapter && initialChapter.audioSrc) {
+    if (initialChapter) {
       setActiveChapter(initialChapter);
     }
   }, [chapters, showFirstPost]);
 
   const handleChapterSelect = (chapter: Chapter) => {
-    if (chapter && 'audioSrc' in chapter && chapter.audioSrc) {
-      setActiveChapter(chapter);
-      setShouldAutoPlay(true);
-    }
+    setActiveChapter(chapter);
+    setShouldAutoPlay(true);
   };
 
   const chapterList = Array.isArray(chapters) ? chapters : [];
@@ -45,7 +43,7 @@ export const PlayerPreview = ({
 
   return (
     <div className="w-full h-full">
-      {activeChapter && 'audioSrc' in activeChapter && activeChapter.audioSrc && (
+      {activeChapter && (
         <AudioPlayer
           src={activeChapter.audioSrc}
           title={activeChapter.title}
