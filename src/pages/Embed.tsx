@@ -51,12 +51,12 @@ const Embed = () => {
   useEffect(() => {
     if (!chapters.length || !settings) return;
     
-    const sortedChaps = settings.sortAscending ? [...chapters].reverse() : chapters;
-    const initialChapter = settings.showFirstPost 
-      ? sortedChaps[sortedChaps.length - 1] 
-      : sortedChaps[0];
-    
     if (!activeChapter) {
+      const sortedChaps = settings.sortAscending ? [...chapters].reverse() : chapters;
+      const initialChapter = settings.showFirstPost 
+        ? sortedChaps[sortedChaps.length - 1] 
+        : sortedChaps[0];
+      
       setActiveChapter(initialChapter);
     }
   }, [chapters, settings]);
