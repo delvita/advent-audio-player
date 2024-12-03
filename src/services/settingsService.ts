@@ -49,7 +49,11 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
     
     // If not in localStorage, try the API endpoint
     console.log('Fetching settings from API for ID:', id);
-    const response = await fetch(`${window.location.origin}/api/settings/${id}`, {
+    const apiUrl = `${window.location.origin}/api/settings/${id}`;
+    console.log('API URL:', apiUrl);
+    
+    const response = await fetch(apiUrl, {
+      method: 'GET',
       headers: {
         'Accept': 'application/json',
       },
