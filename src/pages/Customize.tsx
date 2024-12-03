@@ -1,14 +1,8 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { ColorSettings } from "@/components/ColorSettings";
-import { PlayerSettings } from "@/components/PlayerSettings";
-import { EmbedCodes } from "@/components/EmbedCodes";
+import { SettingsForm } from "@/components/SettingsForm";
 import { PlayerPreview } from '@/components/PlayerPreview';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getFeedItems } from '@/services/feedService';
-import { useState, useEffect } from 'react';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { PlayerSettings as PlayerSettingsType } from '@/types/playerSettings';
 import { generateEmbedId, saveSettings, getAllSettings, getSettingsById, deleteSettings } from '@/services/settingsService';
@@ -126,63 +120,21 @@ const Customize = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card>
-          <CardContent className="p-6">
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="settingsName">Name der Einstellungen</Label>
-                  <Input
-                    id="settingsName"
-                    value={settings.name}
-                    onChange={(e) => setSettings({ ...settings, name: e.target.value })}
-                    placeholder="Mein Custom Player"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="feedUrl">Feed URL</Label>
-                  <Input
-                    id="feedUrl"
-                    value={settings.feedUrl}
-                    onChange={(e) => setSettings({ ...settings, feedUrl: e.target.value })}
-                  />
-                </div>
-
-                <ColorSettings 
-                  colors={settings.colors} 
-                  onChange={(colors) => setSettings({ ...settings, colors })} 
-                />
-                
-                <PlayerSettings
-                  listHeight={settings.listHeight}
-                  sortAscending={settings.sortAscending}
-                  showFirstPost={settings.showFirstPost}
-                  playerType={settings.playerType}
-                  onHeightChange={(height) => setSettings({ ...settings, listHeight: height })}
-                  onSortChange={(sort) => setSettings({ ...settings, sortAscending: sort })}
-                  onFirstPostChange={(show) => setSettings({ ...settings, showFirstPost: show })}
-                  onPlayerTypeChange={(type) => setSettings({ ...settings, playerType: type })}
-                />
-
-                <Button onClick={handleSaveSettings} className="w-full">
-                  Einstellungen speichern
-                </Button>
-
-                <EmbedCodes embedId={settings.id} />
-
-                <div className="pt-6 border-t">
-                  <h3 className="text-lg font-semibold mb-4">Templates</h3>
-                  <TemplatesList
-                    templates={savedSettings}
-                    onEdit={handleLoadSettings}
-                    onDelete={handleDeleteSettings}
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div>
+          <SettingsForm
+            settings={settings}
+            onSettingsChange={setSettings}
+            onSave={handleSaveSettings}
+          />
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-4">Templates</h3>
+            <TemplatesList
+              templates={savedSettings}
+              onEdit={handleLoadSettings}
+              onDelete={handleDeleteSettings}
+            />
+          </div>
+        </div>
 
         <div>
           <h2 className="text-xl font-semibold mb-4">Vorschau</h2>

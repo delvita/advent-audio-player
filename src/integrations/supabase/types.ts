@@ -9,7 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      player_settings: {
+        Row: {
+          colors: Json
+          created_at: string
+          feed_url: string
+          id: string
+          list_height: string
+          name: string
+          player_type: string
+          show_first_post: boolean
+          sort_ascending: boolean
+          updated_at: string
+        }
+        Insert: {
+          colors?: Json
+          created_at?: string
+          feed_url: string
+          id: string
+          list_height?: string
+          name: string
+          player_type?: string
+          show_first_post?: boolean
+          sort_ascending?: boolean
+          updated_at?: string
+        }
+        Update: {
+          colors?: Json
+          created_at?: string
+          feed_url?: string
+          id?: string
+          list_height?: string
+          name?: string
+          player_type?: string
+          show_first_post?: boolean
+          sort_ascending?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

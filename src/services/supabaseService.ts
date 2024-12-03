@@ -1,28 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
-import { PlayerSettings } from '@/types/playerSettings';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl) {
-  throw new Error('Missing environment variable: VITE_SUPABASE_URL must be defined');
-}
-
-if (!supabaseKey) {
-  throw new Error('Missing environment variable: VITE_SUPABASE_ANON_KEY must be defined');
-}
-
-// Validate URL format
-if (!supabaseUrl.startsWith('https://') || !supabaseUrl.endsWith('.supabase.co')) {
-  throw new Error('Invalid VITE_SUPABASE_URL format. Must be in format: https://your-project-id.supabase.co');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+import { supabase } from "@/integrations/supabase/client";
+import { PlayerSettings } from "@/types/playerSettings";
 
 export const saveSettings = async (settings: PlayerSettings): Promise<void> => {
   const { error } = await supabase
     .from('player_settings')
-    .upsert({ 
+    .upsert({
       id: settings.id,
       name: settings.name,
       feed_url: settings.feedUrl,
