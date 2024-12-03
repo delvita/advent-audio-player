@@ -23,7 +23,7 @@ const Embed = () => {
 
   const { data: chapters = [], isLoading } = useQuery({
     queryKey: ['feed-items', settings?.feedUrl],
-    queryFn: () => settings?.feedUrl ? getFeedItems(settings.feedUrl) : Promise.resolve([]),
+    queryFn: () => settings?.feedUrl ? getFeedItems({ queryKey: ['feed-items', settings.feedUrl] }) : Promise.resolve([]),
     enabled: !!settings?.feedUrl
   });
 

@@ -38,7 +38,7 @@ const Customize = () => {
 
   const { data: chapters = [] } = useQuery({
     queryKey: ['feed-items', settings.feedUrl],
-    queryFn: () => getFeedItems(settings.feedUrl)
+    queryFn: () => getFeedItems({ queryKey: ['feed-items', settings.feedUrl] })
   });
 
   useEffect(() => {
