@@ -23,12 +23,19 @@ const ChapterList = ({ chapters, onChapterSelect, activeChapter, maxHeight = 600
     500: 'h-[500px]',
     600: 'h-[600px]',
     700: 'h-[700px]'
+  } as const;
+  
+  type ValidHeight = keyof typeof heightClasses;
+  
+  const getHeightClass = (height: number): string => {
+    if (Object.keys(heightClasses).includes(height.toString())) {
+      return heightClasses[height as ValidHeight];
+    }
+    return heightClasses[600];
   };
   
-  const heightClass = heightClasses[maxHeight as keyof typeof heightClasses] || heightClasses[600];
-  
   return (
-    <ScrollArea className={`w-full ${heightClass} rounded-md border`}>
+    <ScrollArea className={`w-full ${getHeightClass(maxHeight)} rounded-md border`}>
       <div className="space-y-0">
         {chapters.map((chapter, index) => (
           <div 
