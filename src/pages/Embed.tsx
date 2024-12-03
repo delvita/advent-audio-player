@@ -46,12 +46,18 @@ const Embed = () => {
     enabled: !!settings?.feedUrl
   });
 
+  // Sort chapters based on settings
+  const sortedChapters = [...chapters];
+  if (settings?.sortAscending) {
+    sortedChapters.reverse();
+  }
+
   useEffect(() => {
-    if (chapters.length > 0 && settings) {
-      const initialChapter = settings.showFirstPost ? chapters[chapters.length - 1] : chapters[0];
+    if (sortedChapters.length > 0 && settings) {
+      const initialChapter = settings.showFirstPost ? sortedChapters[sortedChapters.length - 1] : sortedChapters[0];
       setActiveChapter(initialChapter);
     }
-  }, [chapters, settings?.showFirstPost]);
+  }, [sortedChapters, settings?.showFirstPost]);
 
   if (isLoading) {
     return <div className="p-4">Lädt...</div>;
@@ -82,7 +88,7 @@ const Embed = () => {
       )}
       <div className="mt-2.5">
         <ChapterList
-          chapters={chapters}
+          chapters={sortedChapters}
           onChapterSelect={setActiveChapter}
           activeChapter={activeChapter}
           maxHeight={parseInt(settings.listHeight)}
