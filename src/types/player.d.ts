@@ -7,7 +7,7 @@ export interface Chapter {
 
 export interface PlayerPreviewProps {
   chapters?: Chapter[];
-  showFirstPost: boolean;
-  listHeight: string;
-  style?: PlayerCSSProperties;
+  showFirstPost?: boolean;
+  listHeight?: string;
+  style?: React.CSSProperties;
 }
