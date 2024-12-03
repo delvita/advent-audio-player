@@ -35,6 +35,26 @@ const parser: Parser<CustomFeed, CustomItem> = new Parser({
   customFields: {
     item: [['media:content', 'media:content']],
   },
+  requestOptions: {
+    // Use fetch API instead of Node's http module
+    fetcher: async (url: string) => {
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'Accept': 'application/rss+xml, application/xml, text/xml; q=0.1',
+          }
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const text = await response.text();
+        return text;
+      } catch (error) {
+        console.error('Feed fetch error:', error);
+        throw error;
+      }
+    }
+  }
 });
 
 const MAX_RETRIES = 3;
@@ -70,6 +90,7 @@ export const getFeedItems = async ({
         publishDate: item.pubDate,
       }));
     } catch (error) {
+      console.error(`Attempt ${attempt + 1} failed:`, error);
       lastError = error instanceof Error ? error : new Error('Unknown error occurred');
       if (attempt < MAX_RETRIES - 1) {
         await delay(RETRY_DELAY * Math.pow(2, attempt)); // Exponential backoff
