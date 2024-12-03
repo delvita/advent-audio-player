@@ -1,7 +1,7 @@
 import AudioPlayer from '@/components/AudioPlayer';
 import ChapterList from '@/components/ChapterList';
 import { Chapter } from '@/components/ChapterList';
-import { useState, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 
 interface PlayerPreviewProps {
   chapters: Chapter[];
@@ -11,15 +11,15 @@ interface PlayerPreviewProps {
 }
 
 export const PlayerPreview = ({ chapters, initialChapter, showFirstPost, listHeight }: PlayerPreviewProps) => {
-  // Memoize the getInitialChapter function
-  const getInitialChapter = useCallback(() => {
+  // Berechne das initiale Kapitel mit useMemo statt useCallback
+  const defaultChapter = useMemo(() => {
     if (initialChapter) return initialChapter;
     if (chapters.length === 0) return undefined;
     return showFirstPost ? chapters[chapters.length - 1] : chapters[0];
   }, [chapters, initialChapter, showFirstPost]);
 
-  // Initialize states
-  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(() => getInitialChapter());
+  // Initialisiere states
+  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>(defaultChapter);
   const [shouldAutoPlay, setShouldAutoPlay] = useState(false);
 
   // Handle chapter selection
