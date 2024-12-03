@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useToast } from "@/components/ui/use-toast";
 import AudioPlayer from '@/components/AudioPlayer';
-import ChapterList, { Chapter } from '@/components/ChapterList';
+import ChapterList from '@/components/ChapterList';
 import { getFeedItems } from '@/services/feedService';
-import { useToast } from '@/components/ui/use-toast';
+import type { Chapter } from '@/components/ChapterList';
 
 const Index = () => {
-  const [activeChapter, setActiveChapter] = useState<Chapter>();
+  const [activeChapter, setActiveChapter] = useState<Chapter | undefined>();
   const { toast } = useToast();
 
   const { data: chapters = [], isLoading, error } = useQuery({
     queryKey: ['feed-items', 'https://mf1.ch/crosproxy/?https://wirfamilien.ch/tag/advent/feed'],
-    queryFn: getFeedItems,
+    queryFn: () => getFeedItems({ 
+      queryKey: ['feed-items', 'https://mf1.ch/crosproxy/?https://wirfamilien.ch/tag/advent/feed'] 
+    }),
     meta: {
       onError: (err: Error) => {
         toast({
