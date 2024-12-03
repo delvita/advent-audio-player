@@ -2,7 +2,9 @@ import { Chapter } from '@/components/ChapterList';
 
 export const getFeedItems = async (): Promise<Chapter[]> => {
   try {
-    const response = await fetch('https://wirfamilien.ch/tag/advent/feed');
+    const corsProxy = 'https://cors-proxy.io/api/';
+    const feedUrl = 'https://wirfamilien.ch/tag/advent/feed';
+    const response = await fetch(corsProxy + feedUrl);
     const text = await response.text();
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(text, 'text/xml');
