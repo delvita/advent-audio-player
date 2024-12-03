@@ -80,9 +80,9 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
       const [_, feedUrl] = queryKey;
-      const proxyUrl = `https://mf1.ch/crosproxy/?${feedUrl}`;
-      console.log(`Attempt ${attempt + 1}: Fetching feed from ${proxyUrl}`);
+      console.log(`Attempt ${attempt + 1}: Fetching feed from ${feedUrl}`);
       
+      const proxyUrl = `https://mf1.ch/crosproxy/?${feedUrl}`;
       const response = await fetchWithTimeout(proxyUrl);
       
       if (!response.ok) {
@@ -101,7 +101,7 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
           'PARSE'
         );
       }
-      
+
       const items = Array.from(parseResult.document.querySelectorAll('item'))
         .map(parseFeedItem)
         .filter(item => item.audioUrl); // Only include items with audio
@@ -113,10 +113,9 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
         publishDate: item.publishDate
       }));
     } catch (error) {
-      console.error(`Attempt ${attempt + 1} failed:`, error);
       lastError = error instanceof Error ? 
-        createFeedError(error.message, 'UNKNOWN', error) : 
-        createFeedError('Unknown error occurred', 'UNKNOWN');
+        createFeedError(error.message, 'UNKNOWN', error) :
+        createFeedError('Unknown error occurred', 'UNKNOWN', error);
       
       if (attempt < MAX_RETRIES - 1) {
         const backoffDelay = RETRY_DELAY * Math.pow(2, attempt);
