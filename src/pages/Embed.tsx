@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import AudioPlayer from '@/components/AudioPlayer';
 import ChapterList, { Chapter } from '@/components/ChapterList';
 import { useQuery } from '@tanstack/react-query';
@@ -47,21 +47,19 @@ const Embed = () => {
     enabled: !!settings?.feedUrl
   });
 
-  // Sort chapters using useMemo to prevent unnecessary recalculations
-  const sortedChapters = useMemo(() => {
-    if (!chapters.length) return [];
-    return settings?.sortAscending ? [...chapters].reverse() : chapters;
-  }, [chapters, settings?.sortAscending]);
-
-  // Set initial chapter only when chapters or settings change
+  // Process chapters and set initial chapter
   useEffect(() => {
-    if (!activeChapter && sortedChapters.length > 0 && settings) {
+    if (!chapters.length || !settings) return;
+
+    const sortedChapters = settings.sortAscending ? [...chapters].reverse() : chapters;
+    
+    if (!activeChapter) {
       const initialChapter = settings.showFirstPost 
         ? sortedChapters[sortedChapters.length - 1] 
         : sortedChapters[0];
       setActiveChapter(initialChapter);
     }
-  }, [sortedChapters, settings]);
+  }, [chapters, settings]);
 
   if (isLoading) {
     return <div className="p-4">Lädt...</div>;
@@ -74,6 +72,8 @@ const Embed = () => {
   if (!settings) {
     return <div className="p-4">Keine Einstellungen gefunden</div>;
   }
+
+  const sortedChapters = settings.sortAscending ? [...chapters].reverse() : chapters;
 
   return (
     <div style={{
