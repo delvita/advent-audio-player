@@ -39,20 +39,24 @@ export const getAllSettings = (): PlayerSettings[] => {
 
 export const getSettingsById = async (id: string): Promise<PlayerSettings | null> => {
   try {
-    // First try to get settings from the API endpoint
-    const response = await fetch(`${window.location.origin}/api/settings/${id}`);
-    if (response.ok) {
-      const settings = await response.json();
-      console.log('Settings loaded from API:', settings);
-      return settings;
-    }
-    
-    // Fallback to localStorage
+    // First try to get settings from localStorage
     const settings = localStorage.getItem(`settings_${id}`);
     if (settings) {
       const parsedSettings = JSON.parse(settings);
       console.log('Settings loaded from localStorage:', parsedSettings);
       return parsedSettings;
+    }
+    
+    // If not in localStorage, try the API endpoint
+    const response = await fetch(`${window.location.origin}/api/settings/${id}`);
+    if (response.ok) {
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const settings = await response.json();
+        console.log('Settings loaded from API:', settings);
+        return settings;
+      }
+      console.log('API response was not JSON:', contentType);
     }
     
     console.log('No settings found for ID:', id);
