@@ -1,5 +1,5 @@
 import type { Chapter } from '@/components/ChapterList';
-import type { FeedItem, FeedError, FeedResponse } from '@/types/feed';
+import type { FeedItem, FeedError, XMLParseResult } from '@/types/feed';
 
 const TIMEOUT_DURATION = 10000; // 10 seconds
 const MAX_RETRIES = 3;
@@ -32,6 +32,31 @@ const fetchWithTimeout = async (url: string): Promise<Response> => {
   }
 };
 
+const parseXMLSafely = (text: string): XMLParseResult => {
+  try {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(text, 'text/xml');
+    
+    const parseError = xmlDoc.querySelector('parsererror');
+    if (parseError) {
+      return {
+        success: false,
+        error: parseError.textContent || 'Unknown XML parsing error'
+      };
+    }
+
+    return {
+      success: true,
+      document: xmlDoc
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown parsing error'
+    };
+  }
+};
+
 const extractImageUrl = (content: string): string | undefined => {
   const imgMatch = content?.match(/<img[^>]+src="([^">]+)"/);
   return imgMatch?.[1];
@@ -40,7 +65,7 @@ const extractImageUrl = (content: string): string | undefined => {
 const parseFeedItem = (item: Element): FeedItem => {
   return {
     title: item.querySelector('title')?.textContent || 'Untitled',
-    audioUrl: item.querySelector('enclosure')?.getAttribute('url'),
+    audioUrl: item.querySelector('enclosure')?.getAttribute('url') || null,
     imageUrl: item.querySelector('media\\:content, content')?.getAttribute('url') ||
              (item.querySelector('content\\:encoded, description')?.textContent && 
               extractImageUrl(item.querySelector('content\\:encoded, description')?.textContent || '')),
@@ -68,18 +93,16 @@ export const getFeedItems = async ({ queryKey }: { queryKey: readonly [string, s
       }
 
       const text = await response.text();
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(text, "text/xml");
+      const parseResult = parseXMLSafely(text);
       
-      const parseError = xmlDoc.querySelector('parsererror');
-      if (parseError) {
+      if (!parseResult.success || !parseResult.document) {
         throw createFeedError(
-          `XML parsing error: ${parseError.textContent}`,
+          `XML parsing error: ${parseResult.error}`,
           'PARSE'
         );
       }
       
-      const items = Array.from(xmlDoc.querySelectorAll('item'))
+      const items = Array.from(parseResult.document.querySelectorAll('item'))
         .map(parseFeedItem)
         .filter(item => item.audioUrl); // Only include items with audio
 

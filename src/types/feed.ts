@@ -1,6 +1,6 @@
 export interface FeedItem {
   title: string;
-  audioUrl?: string;
+  audioUrl: string | null;
   imageUrl?: string;
   publishDate?: string;
   content?: string;
@@ -11,7 +11,8 @@ export interface FeedError extends Error {
   originalError?: unknown;
 }
 
-export interface FeedResponse {
-  items: FeedItem[];
-  error?: FeedError;
+export interface XMLParseResult {
+  success: boolean;
+  error?: string;
+  document?: Document;
 }
