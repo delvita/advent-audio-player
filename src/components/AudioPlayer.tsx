@@ -23,23 +23,20 @@ const AudioPlayer = ({ src, title, image, autoPlay = false }: AudioPlayerProps) 
     if (audioRef.current) {
       audioRef.current.addEventListener('timeupdate', handleTimeUpdate);
       audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
+      audioRef.current.addEventListener('ended', () => setIsPlaying(false));
       
-      if (autoPlay) {
-        audioRef.current.play()
-          .catch(() => {
-            // Silently handle autoplay restriction without showing error
-            setIsPlaying(false);
-          });
-      }
+      // Don't attempt autoplay on initial load
+      setIsPlaying(false);
       
       return () => {
         if (audioRef.current) {
           audioRef.current.removeEventListener('timeupdate', handleTimeUpdate);
           audioRef.current.removeEventListener('loadedmetadata', handleLoadedMetadata);
+          audioRef.current.removeEventListener('ended', () => setIsPlaying(false));
         }
       };
     }
-  }, [src, autoPlay]);
+  }, [src]);
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
