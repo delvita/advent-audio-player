@@ -22,6 +22,7 @@ export const saveSettings = (settings: PlayerSettings): void => {
     console.log('Settings saved successfully:', settings);
   } catch (error) {
     console.error('Error saving settings:', error);
+    throw new Error('Failed to save settings');
   }
 };
 
@@ -40,15 +41,14 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
     // Zuerst im localStorage suchen
     const localSettings = localStorage.getItem(`settings_${id}`);
     if (localSettings) {
-      const parsedSettings = JSON.parse(localSettings);
-      console.log('Settings loaded from localStorage:', parsedSettings);
-      return parsedSettings;
+      console.log('Settings loaded from localStorage:', JSON.parse(localSettings));
+      return JSON.parse(localSettings);
     }
     
     // Wenn nicht im localStorage, dann von der API abrufen
     const response = await fetch(`/api/settings/${id}`);
     if (!response.ok) {
-      console.log('API request failed:', response.status);
+      console.error('API request failed:', response.status);
       return null;
     }
     
@@ -69,7 +69,13 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
 };
 
 export const deleteSettings = (id: string): void => {
-  const settings = getAllSettings().filter(s => s.id !== id);
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-  localStorage.removeItem(`settings_${id}`);
+  try {
+    const settings = getAllSettings().filter(s => s.id !== id);
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    localStorage.removeItem(`settings_${id}`);
+    console.log('Settings deleted successfully:', id);
+  } catch (error) {
+    console.error('Error deleting settings:', error);
+    throw new Error('Failed to delete settings');
+  }
 };
