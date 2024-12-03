@@ -18,9 +18,9 @@ export const PlayerPreview = ({ chapters, showFirstPost, listHeight }: PlayerPre
       setActiveChapter(undefined);
       return;
     }
-    
-    const newInitialChapter = showFirstPost ? chapters[chapters.length - 1] : chapters[0];
-    setActiveChapter(newInitialChapter);
+
+    const initialChapter = showFirstPost ? chapters[chapters.length - 1] : chapters[0];
+    setActiveChapter(initialChapter);
   }, [chapters, showFirstPost]);
 
   const handleChapterSelect = (chapter: Chapter) => {
@@ -29,7 +29,7 @@ export const PlayerPreview = ({ chapters, showFirstPost, listHeight }: PlayerPre
   };
 
   if (!chapters.length) {
-    return <div className="p-4">No chapters available</div>;
+    return <div className="p-4">Keine Kapitel verfügbar</div>;
   }
 
   return (
