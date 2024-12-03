@@ -52,7 +52,7 @@ const Embed = () => {
         : sortedChapters[0];
       setActiveChapter(initialChapter);
     }
-  }, [sortedChapters.length, settings]);
+  }, [sortedChapters.length, settings, activeChapter]);
 
   if (isLoading) {
     return <div className="p-4">Lädt...</div>;
