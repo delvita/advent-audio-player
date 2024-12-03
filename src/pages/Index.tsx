@@ -10,7 +10,7 @@ const Index = () => {
   const { toast } = useToast();
 
   const { data: chapters = [], isLoading, error } = useQuery({
-    queryKey: ['feed-items', 'https://wirfamilien.ch/tag/advent/feed'],
+    queryKey: ['feed-items', 'https://mf1.ch/crosproxy/?https://wirfamilien.ch/tag/advent/feed'],
     queryFn: getFeedItems,
     meta: {
       onError: (err: Error) => {
