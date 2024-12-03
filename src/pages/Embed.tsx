@@ -13,6 +13,7 @@ const Embed = () => {
   const [settings, setSettings] = useState<PlayerSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [feedUrl, setFeedUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -23,6 +24,7 @@ const Embed = () => {
           const loadedSettings = await getSettingsById(embedId);
           if (loadedSettings) {
             setSettings(loadedSettings);
+            setFeedUrl(loadedSettings.feedUrl);
           } else {
             setError('Keine Einstellungen gefunden');
           }
@@ -38,9 +40,9 @@ const Embed = () => {
   }, [embedId]);
 
   const { data: chapters = [] } = useQuery({
-    queryKey: ['feed-items', settings?.feedUrl],
-    queryFn: () => getFeedItems({ queryKey: ['feed-items', settings?.feedUrl || ''] }),
-    enabled: !!settings?.feedUrl
+    queryKey: ['feed-items', feedUrl],
+    queryFn: () => getFeedItems({ queryKey: ['feed-items', feedUrl || ''] }),
+    enabled: !!feedUrl
   });
 
   // Sort chapters based on settings
