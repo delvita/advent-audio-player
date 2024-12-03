@@ -1,6 +1,7 @@
 import { PlayerSettings } from '@/types/playerSettings';
 
 const SETTINGS_KEY = 'player_settings';
+const API_BASE_URL = 'https://advent-audio-player.lovable.app'; // Feste API-URL
 
 export const generateEmbedId = (): string => {
   return Math.random().toString(36).substring(2, 15);
@@ -18,7 +19,6 @@ export const saveSettings = (settings: PlayerSettings): void => {
   
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(existingSettings));
-    // Also save individual settings by ID for cross-domain access
     localStorage.setItem(`settings_${settings.id}`, JSON.stringify(settings));
     console.log('Settings saved successfully:', settings);
   } catch (error) {
@@ -29,7 +29,6 @@ export const saveSettings = (settings: PlayerSettings): void => {
 export const getAllSettings = (): PlayerSettings[] => {
   try {
     const settings = localStorage.getItem(SETTINGS_KEY);
-    console.log('Raw settings from localStorage:', settings);
     return settings ? JSON.parse(settings) : [];
   } catch (error) {
     console.error('Error getting settings:', error);
@@ -39,21 +38,17 @@ export const getAllSettings = (): PlayerSettings[] => {
 
 export const getSettingsById = async (id: string): Promise<PlayerSettings | null> => {
   try {
-    // First try to get settings from localStorage
+    // Zuerst in localStorage suchen
     const localSettings = localStorage.getItem(`settings_${id}`);
     if (localSettings) {
-      console.log('Settings found in localStorage:', localSettings);
-      return JSON.parse(localSettings);
+      const parsedSettings = JSON.parse(localSettings);
+      console.log('Settings loaded from localStorage:', parsedSettings);
+      return parsedSettings;
     }
     
-    // If not in localStorage, try the API endpoint
+    // Wenn nicht in localStorage gefunden, API anfragen
     console.log('Fetching settings from API for ID:', id);
-    
-    // Use the fixed domain for the audio player
-    const apiUrl = 'https://advent-audio-player.lovable.app/api/settings/' + id;
-    console.log('API URL:', apiUrl);
-    
-    const response = await fetch(apiUrl, {
+    const response = await fetch(`${API_BASE_URL}/api/settings/${id}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -61,19 +56,14 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
       }
     });
     
-    console.log('API Response status:', response.status);
-    console.log('API Response headers:', response.headers);
-    
     if (!response.ok) {
       console.error('API response not OK:', response.status);
       return null;
     }
 
     const rawText = await response.text();
-    console.log('Raw API response:', rawText);
-
+    
     try {
-      // Only try to parse if it doesn't start with <!DOCTYPE
       if (rawText.trim().startsWith('<!DOCTYPE')) {
         console.error('Received HTML instead of JSON');
         return null;
@@ -87,10 +77,11 @@ export const getSettingsById = async (id: string): Promise<PlayerSettings | null
         return null;
       }
       
+      // Erfolgreiche API-Antwort auch im localStorage speichern
+      localStorage.setItem(`settings_${id}`, JSON.stringify(settings));
       return settings;
     } catch (error) {
       console.error('Failed to parse API response:', error);
-      console.log('Raw response was:', rawText);
       return null;
     }
   } catch (error) {
