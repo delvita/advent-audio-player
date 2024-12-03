@@ -5,7 +5,9 @@ import { useQuery } from '@tanstack/react-query';
 import { getFeedItems } from '@/services/feedService';
 import { getSettingsById } from '@/services/settingsService';
 import type { PlayerSettings } from '@/types/playerSettings';
+import type { PlayerCSSProperties } from '@/types/css';
 import { useToast } from '@/components/ui/use-toast';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const Embed = () => {
   const { embedId } = useParams();
@@ -57,19 +59,23 @@ const Embed = () => {
 
   const sortedChapters = settings.sortAscending ? [...chapters].reverse() : chapters;
 
+  const playerStyle: PlayerCSSProperties = {
+    '--player-bg': settings.colors.background,
+    '--player-text': settings.colors.text,
+    '--player-primary': settings.colors.primary,
+    '--player-secondary': settings.colors.secondary,
+  };
+
   return (
-    <div className="h-full w-full" style={{
-      '--player-bg': settings.colors.background,
-      '--player-text': settings.colors.text,
-      '--player-primary': settings.colors.primary,
-      '--player-secondary': settings.colors.secondary,
-    } as React.CSSProperties}>
-      <PlayerPreview
-        chapters={sortedChapters}
-        showFirstPost={settings.showFirstPost}
-        listHeight={settings.listHeight}
-      />
-    </div>
+    <ErrorBoundary>
+      <div className="h-full w-full" style={playerStyle}>
+        <PlayerPreview
+          chapters={sortedChapters}
+          showFirstPost={settings.showFirstPost}
+          listHeight={settings.listHeight}
+        />
+      </div>
+    </ErrorBoundary>
   );
 };
 
